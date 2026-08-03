@@ -22,6 +22,10 @@ RF-06 exige que, ao aprovar um cenário, os artefatos relevantes sejam sincroniz
 
 A aprovação de um cenário é uma transação local do ArqFlow, concluída imediatamente. A sincronização com a BiZZdesign acontece de forma assíncrona via fila, com um adaptador de integração dedicado por tenant (compatível com o plano de API que aquele cliente tem), e political de retry automática dentro do prazo de 24h definido no RNF.
 
+## Padrão arquitetural
+
+**Queue-Based Load Leveling** combinado com **Retry Pattern** (ambos catalogados no Azure Architecture Center como padrões de integração em nuvem): a fila absorve a variação de disponibilidade/latência da BiZZdesign, e a política de retry com backoff trata falhas temporárias como esperadas, não excepcionais. O adaptador de integração por tenant é, novamente, um **Anti-Corruption Layer** — traduz o modelo interno do ArqFlow (cenário aprovado) para o esquema externo da BiZZdesign, isolando o core do produto de mudanças na API de terceiros. A interface genérica de "exportar artefato para EA" por trás da qual o adaptador vive é um **Strategy Pattern** (GoF): permite trocar/adicionar uma implementação (BiZZdesign hoje, Ardoq ou LeanIX amanhã) sem alterar o fluxo de aprovação que a consome.
+
 ## Justificativa
 
 Tratar um sistema de terceiros que não controlamos como se fosse tão confiável quanto o próprio ArqFlow seria ignorar a natureza real da integração — a BiZZdesign pode ficar indisponível, mudar rate limits, ou ter latência variável, e nada disso deveria impedir um arquiteto de aprovar um cenário dentro do próprio produto.

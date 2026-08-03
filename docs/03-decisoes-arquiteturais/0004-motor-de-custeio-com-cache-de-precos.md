@@ -22,6 +22,10 @@ RF-03 exige que, ao montar um cenário, o arquiteto veja uma estimativa de custo
 
 Manter uma tabela de preços normalizada (por categoria de recurso e por provedor), atualizada por um job periódico que consulta as APIs públicas de precificação de cada nuvem a cada 24h. Toda estimativa de cenário é calculada localmente a partir dessa tabela, e cada estimativa registra a data de referência do preço utilizado.
 
+## Padrão arquitetural
+
+**Materialized View** (pré-computa e armazena localmente uma visão derivada de uma fonte externa cara/lenta de consultar) combinado com **Cache-Aside** (a leitura de uma estimativa de custo sempre acessa o cache local primeiro, nunca a fonte externa diretamente) — ambos catalogados no Azure Architecture Center. O job periódico de sincronização é uma instância de **Scheduled Batch / Polling Consumer**: em vez de reagir a um evento (não há webhook confiável e uniforme entre AWS/Azure/GCP para preços), o próprio ArqFlow puxa a atualização em intervalo fixo (24h).
+
 ## Justificativa
 
 A resposta do discovery de que defasagem de até 24h é aceitável — e até desejável para consistência — é o que permite tirar a chamada de precificação do caminho síncrono da UI, atendendo ao RNF de latência sem sacrificar a utilidade da estimativa para o propósito real (decisão comparativa, não faturamento).

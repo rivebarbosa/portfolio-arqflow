@@ -22,6 +22,10 @@ O ArqFlow é vendido a múltiplas empresas-cliente (tenants), cada uma com dados
 
 Cada tenant recebe seu próprio schema PostgreSQL dentro da mesma instância de banco. O roteamento do schema correto acontece na borda (gateway de aplicação), a partir da identidade do tenant resolvida no login SSO.
 
+## Padrão arquitetural
+
+**Schema-per-tenant** (também chamado de modelo **"Bridge"** na literatura de tenancy de SaaS — um meio-termo entre isolamento total por infraestrutura dedicada, o modelo **"Silo"**, e compartilhamento total de linhas em uma mesma tabela, o modelo **"Pool"**). O roteamento do schema correto a partir da identidade do tenant é uma instância do padrão **Routing/Context Propagation**: a identidade resolvida no SSO (ADR-0002) se propaga como contexto de execução que determina qual schema a conexão de banco deve usar.
+
 ## Justificativa
 
 Como o Time de Segurança/IAM do cliente tem poder de veto sobre isolamento de dados (ver [stakeholders.md](../01-discovery/stakeholders.md)), a Opção A exigiria provar, para cada auditoria de cliente, que a aplicação nunca erra um filtro — uma garantia frágil por natureza. A Opção B desloca parte dessa garantia para o banco de dados, que é uma camada mais fácil de auditar e testar automaticamente (ex: testes que tentam acessar um schema errado e esperam falha).

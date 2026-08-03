@@ -22,6 +22,16 @@ Os 3 clientes-piloto já usam três provedores de identidade diferentes (Azure A
 
 Adotar um gateway de identidade dedicado como camada de federação: cada tenant configura seu IdP (OIDC ou SAML) no gateway via painel administrativo self-service; o ArqFlow recebe sempre um token normalizado (OIDC) do gateway, nunca fala diretamente com o IdP do cliente.
 
+## Padrão arquitetural
+
+**Identity Broker** (também chamado de *Federation Hub* ou *IdP Proxy* na literatura de IAM — é a capacidade que ferramentas como Keycloak chamam explicitamente de "Identity Brokering"). Ele combina três padrões mais genéricos:
+
+- **Adapter** (GoF): traduz os diferentes protocolos de cada IdP (asserções SAML, tokens OIDC) para um único formato normalizado.
+- **Facade** (GoF): expõe ao core do ArqFlow uma interface única e simples, escondendo a variedade de protocolos e provedores por trás dela.
+- **Anti-Corruption Layer** (DDD — Eric Evans/Vaughn Vernon): protege o modelo de domínio interno do ArqFlow (o conceito de "usuário autenticado") de ser contaminado pelos detalhes e variações de cada IdP externo.
+
+Não deve ser confundido com um **API Gateway genérico** (que roteia/agrega chamadas de API) — este é especializado em identidade, papel equivalente ao de um **STS (Security Token Service)** no mundo SAML/WS-Federation.
+
 ## Justificativa
 
 A resposta do discovery — múltiplos provedores hoje, mais no futuro, sem lista fechada — é exatamente o cenário em que integração ponto-a-ponto no core do produto não escala: cada cliente novo viraria uma tarefa de engenharia. Um gateway de federação transforma "suportar um novo IdP" em configuração, alinhado ao requisito de onboarding self-service.
