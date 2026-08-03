@@ -8,10 +8,10 @@ Este é o segundo caso de estudo do meu portfólio. O primeiro ([PagFácil](http
 
 ## Sobre mim
 
-*(Substitua esta seção: 2-3 linhas sobre sua experiência)*
+Sou **Roberto Rivelino Barbosa**, Arquiteto de Soluções Sênior, com experiência na definição de padrões arquiteturais (microsserviços, event-driven, SOA/ESB, API-first) e na tradução de necessidades de negócio em soluções alinhadas à estratégia de TI, em ambientes AWS e Azure. Atuo na governança de arquitetura sob o framework TOGAF, com vivência em Enterprise Architecture (Ardoq, Qualiware, ArchiMate) e foco constante em segurança e compliance (LGPD, PCI-DSS, Zero Trust).
 
-- LinkedIn: *seu link*
-- E-mail: *seu contato*
+- LinkedIn: [linkedin.com/in/rivelinoroberto](https://linkedin.com/in/rivelinoroberto)
+- E-mail: roberto.rivebarbosa@gmail.com
 
 ## Como navegar
 
