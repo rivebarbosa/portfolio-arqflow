@@ -41,14 +41,15 @@ ArqFlow é vendido a empresas (clientes B2B, cada uma um "tenant") cujos times d
 - Integração com um sistema de terceiros (BiZZdesign) que a ArqFlow não controla, com garantias de consistência realistas
 - Estimativa de custo (FinOps) que precisa ser rápida e comparável entre cenários, sem depender de chamada síncrona às APIs de precificação das clouds a cada cotação
 
-## Stack de exemplo
+## Stack proposta
 
-*(Ajuste para a stack que você realmente domina/quer demonstrar)*
+
 
 - Backend: serviços organizados por domínio (linguagem a definir por você)
-- Mensageria/integração assíncrona: fila de eventos para sincronização com BiZZdesign e para o motor de custos
-- Bancos de dados: PostgreSQL (schema por tenant) + cache de tabelas de preço de nuvem
-- Identidade: gateway de autenticação compatível com OIDC/SAML (ex: um broker tipo Keycloak/Auth0)
+- Backend: serviços organizados por domínio, com API REST e contrato versionado
+- Integração assíncrona: fila de eventos para sincronização com o BiZZdesign e para o motor de custos, com idempotência no consumidor
+- Dados: PostgreSQL com schema por tenant, mais cache das tabelas de preço de nuvem
+- Identidade: broker OIDC/SAML para federação com o provedor de cada cliente
 
 ---
 
