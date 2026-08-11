@@ -1,4 +1,4 @@
-# Portfólio de Arquitetura de Software — ArqFlow
+# Portfólio de Arquitetura de Solução — ArqFlow
 
 Este repositório documenta, do início ao fim, o processo de arquitetura de um produto fictício: **ArqFlow**, uma plataforma SaaS B2B para times de arquitetura de soluções gerenciarem o ciclo de vida de uma demanda técnica — do recebimento da demanda até a aprovação de um cenário de solução com custo estimado (FinOps) e desenho de arquitetura.
 
