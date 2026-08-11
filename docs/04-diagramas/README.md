@@ -20,3 +20,9 @@ Diagramas em modelo **C4** (Contexto → Containers), feitos em [draw.io](https:
 - O **Banco de Dados** é organizado por schema-por-tenant (ADR-0001) e é a fonte de dados de demanda/cenário/diagrama; o **Serviço de Dashboard** lê de lá, nunca escreve.
 - A aprovação de um cenário publica um evento no **Barramento de Eventos**, consumido de forma assíncrona pelo **Serviço de Integração EA** — a aprovação em si nunca espera a BiZZdesign responder (ADR-0003).
 - O **Motor de Custeio** nunca chama as APIs de nuvem diretamente; ele lê do **Cache de Preços**, que é atualizado por um job periódico separado (ADR-0004) — por isso a cotação de um cenário é local e rápida (RNF < 1s).
+
+---
+
+## Diagrama de implantação (AWS/Kubernetes)
+
+O diagrama de infraestrutura — como esses containers são implantados em AWS/EKS — está em [`06-implantacao-e-operacao/arquitetura-aws.md`](../06-implantacao-e-operacao/arquitetura-aws.md), como diagrama Mermaid (para manter renderização nativa no GitHub sem depender de export manual, diferente dos diagramas C4 acima, que são draw.io).

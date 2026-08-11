@@ -22,6 +22,7 @@ Sou **Roberto Rivelino Barbosa**, Arquiteto de Soluções Sênior, com experiên
 | 3. Decisões | [`docs/03-decisoes-arquiteturais/`](docs/03-decisoes-arquiteturais/) | ADRs — cada decisão relevante, alternativas consideradas e motivo da escolha |
 | 4. Diagramas | [`docs/04-diagramas/`](docs/04-diagramas/README.md) | Modelo C4 (contexto e containers), feitos em draw.io |
 | 5. Trade-offs | [`docs/05-trade-offs/analise-trade-offs.md`](docs/05-trade-offs/analise-trade-offs.md) | O que foi ganho e perdido em cada decisão relevante |
+| 6. Implantação | [`docs/06-implantacao-e-operacao/`](docs/06-implantacao-e-operacao/README.md) | Arquitetura AWS de referência (EKS), boas práticas de Kubernetes e esteira de CI/CD |
 
 ## Resumo do produto
 

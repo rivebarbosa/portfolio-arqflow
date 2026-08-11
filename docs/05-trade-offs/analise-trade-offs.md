@@ -32,6 +32,22 @@
 
 **O que perdemos:** exatidão em tempo real, que nem sequer é o objetivo real deste componente (é uma ferramenta de decisão, não de faturamento). Esse é o trade-off mais claro dos quatro: a "precisão perfeita" seria estritamente pior para o caso de uso real, porque prejudicaria a comparação entre cenários ao introduzir variação de preço não relacionada a mudanças no próprio cenário.
 
+## Portabilidade e maturidade de plataforma vs. simplicidade operacional (orquestração)
+
+**O que escolhemos:** Amazon EKS (ADR-0005) em vez de ECS Fargate.
+
+**O que ganhamos:** portabilidade real para um cluster Kubernetes fora da AWS se algum dia isso for exigido, e um ecossistema maduro (GitOps, entrega progressiva, autoscaling orientado a métricas de negócio) que fala a mesma língua dos times de plataforma dos clientes-alvo — relevante em um produto avaliado tecnicamente por esses mesmos times.
+
+**O que perdemos:** simplicidade operacional. EKS exige competência real de Kubernetes do time — RBAC, upgrade de versão, gestão de node groups — que o ECS Fargate dispensaria quase inteiramente. Esse é um trade-off consciente de "mais investimento em capacitação de plataforma agora" em troca de uma opcionalidade e de um ecossistema que só se pagam se o produto de fato escalar em número de serviços e de clientes enterprise sensíveis a portabilidade.
+
+## Segurança estrutural vs. simplicidade de um único pipeline (entrega contínua)
+
+**O que escolhemos:** GitOps com Argo CD (ADR-0007) em vez da esteira de CI aplicar mudanças diretamente no cluster.
+
+**O que ganhamos:** nenhuma credencial de escrita em produção precisa existir fora do cluster — a esteira nunca tem esse poder, o que elimina uma classe inteira de risco de vazamento de credencial. Como consequência colateral, também ganhamos correção automática de *drift* e rollback como uma operação de Git, não de re-execução de pipeline.
+
+**O que perdemos:** um componente a mais para operar dentro do cluster, e uma etapa extra de latência entre "a imagem foi publicada" e "a mudança está de fato em produção" — que passa a depender do ciclo de reconciliação do Argo CD, não só da duração do pipeline. Coerente com o mesmo raciocínio de segurança que já orienta o resto do produto: preferir uma garantia estrutural (a credencial simplesmente não existe fora do cluster) a uma garantia de processo (disciplina de rotacionar/restringir uma credencial que existe).
+
 ## O padrão por trás desses trade-offs
 
-Em três das quatro decisões (identidade, integração BiZZdesign, custeio), a escolha foi **não assumir que um sistema externo é tão confiável ou controlável quanto o próprio produto** — seja um IdP de cliente, a API da BiZZdesign, ou a API de precificação de uma nuvem. Essa é a lição central deste caso de estudo: arquitetura de um produto B2B que integra com terceiros passa mais tempo desenhando para a *falha e a variabilidade* desses terceiros do que desenhando o "caminho feliz" interno.
+Em três das quatro decisões (identidade, integração BiZZdesign, custeio), a escolha foi **não assumir que um sistema externo é tão confiável ou controlável quanto o próprio produto** — seja um IdP de cliente, a API da BiZZdesign, ou a API de precificação de uma nuvem. Essa é a lição central deste caso de estudo: arquitetura de um produto B2B que integra com terceiros passa mais tempo desenhando para a *falha e a variabilidade* desses terceiros do que desenhando o "caminho feliz" interno. Nas decisões de implantação (orquestração e entrega contínua, [ADR-0005](../03-decisoes-arquiteturais/0005-eks-como-orquestrador-de-containers.md)–[ADR-0007](../03-decisoes-arquiteturais/0007-gitops-com-argocd-para-entrega-continua.md)), o mesmo princípio reaparece em outra forma: preferir garantias estruturais (credencial que não existe fora do cluster, isolamento que não depende de disciplina de query) a garantias de processo — mesmo quando isso custa mais investimento operacional agora.
