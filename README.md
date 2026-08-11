@@ -46,7 +46,7 @@ ArqFlow é vendido a empresas (clientes B2B, cada uma um "tenant") cujos times d
 
 
 
-- Backend: serviços organizados por domínio (linguagem a definir por você)
+- Backend: serviços organizados por domínio (Java 21 + Springboot 3.5)
 - Backend: serviços organizados por domínio, com API REST e contrato versionado
 - Integração assíncrona: fila de eventos para sincronização com o BiZZdesign e para o motor de custos, com idempotência no consumidor
 - Dados: PostgreSQL com schema por tenant, mais cache das tabelas de preço de nuvem
