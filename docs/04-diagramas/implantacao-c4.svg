@@ -1,0 +1,155 @@
+<svg viewBox="0 0 2560 1700" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333333"/></marker>
+</defs>
+<rect x="0" y="0" width="2560" height="1700" fill="#FFFFFF"/>
+<text x="40" y="50" font-size="30" font-weight="700" fill="#111111">Diagrama de Implantação (C4 – Deployment) — ArqFlow em AWS/EKS</text>
+<text x="40" y="82" font-size="17" fill="#555555">Nível de implantação: onde cada container roda. Para o fluxo de dados entre serviços, ver Diagrama de Containers (containers.png).</text>
+<rect x="40" y="160" width="260" height="110" rx="10" fill="#1B4F72" stroke="#123A56" stroke-width="1.5"/>
+<text x="170.0" y="193.0" font-size="20" font-weight="700" fill="#FFFFFF" text-anchor="middle">Usuário</text>
+<text x="170.0" y="219.0" font-size="14" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Pessoa]</text>
+<text x="170.0" y="239.0" font-size="13" font-weight="400" fill="#FFFFFF" text-anchor="middle">Arquiteto / Gestor /</text>
+<text x="170.0" y="258.0" font-size="13" font-weight="400" fill="#FFFFFF" text-anchor="middle">Solicitante</text>
+<rect x="340" y="140" width="1720" height="1340" rx="10" fill="none" stroke="#1B4F72" stroke-width="3" stroke-dasharray="14,8"/>
+<text x="360" y="174" font-size="22" font-weight="700" fill="#1B4F72">AWS Cloud — Região (ex: us-east-1), VPC multi-AZ</text>
+<rect x="370" y="190" width="1660" height="190" rx="10" fill="none" stroke="#2E75B6" stroke-width="2.5" stroke-dasharray="10,6"/>
+<text x="390" y="224" font-size="17" font-weight="700" fill="#1B4F72">Nó de Implantação: Borda / Edge (subnets públicas)</text>
+<rect x="400" y="235" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="575.0" y="291.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Amazon Route 53</text>
+<text x="575.0" y="313.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[DNS]</text>
+<rect x="790" y="235" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="965.0" y="291.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">CloudFront + WAF</text>
+<text x="965.0" y="313.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[CDN / Firewall gerenciado]</text>
+<rect x="1180" y="235" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1355.0" y="291.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">ALB</text>
+<text x="1355.0" y="313.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[AWS Load Balancer Controller]</text>
+<rect x="1570" y="235" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1745.0" y="291.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">S3 (frontend SPA)</text>
+<text x="1745.0" y="313.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Static Hosting]</text>
+<rect x="370" y="410" width="1660" height="610" rx="10" fill="none" stroke="#2E75B6" stroke-width="2.5" stroke-dasharray="10,6"/>
+<text x="390" y="444" font-size="17" font-weight="700" fill="#1B4F72">Nó de Implantação: Amazon EKS Cluster (VPC privada, multi-AZ)</text>
+<rect x="400" y="460" width="520" height="250" rx="10" fill="none" stroke="#5FA8D3" stroke-width="1.5" stroke-dasharray="6,5"/>
+<text x="420" y="494" font-size="14" font-weight="700" fill="#2E75B6">ns: identidade</text>
+<rect x="420" y="500" width="480" height="190" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="660.0" y="582.5" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">Gateway de Identidade</text>
+<text x="660.0" y="605.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Container: broker OIDC/SAML]</text>
+<text x="660.0" y="623.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">ADR-0002</text>
+<rect x="945" y="460" width="520" height="250" rx="10" fill="none" stroke="#5FA8D3" stroke-width="1.5" stroke-dasharray="6,5"/>
+<text x="965" y="494" font-size="14" font-weight="700" fill="#2E75B6">ns: demanda-cenario</text>
+<rect x="965" y="500" width="480" height="190" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1205.0" y="582.5" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">Serviço de Demanda/Cenário</text>
+<text x="1205.0" y="605.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Container: API]</text>
+<text x="1205.0" y="623.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">RF-01, 02, 05</text>
+<rect x="1490" y="460" width="520" height="250" rx="10" fill="none" stroke="#5FA8D3" stroke-width="1.5" stroke-dasharray="6,5"/>
+<text x="1510" y="494" font-size="14" font-weight="700" fill="#2E75B6">ns: custeio</text>
+<rect x="1510" y="495" width="480" height="95" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1750.0" y="538.5" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Motor de Custeio</text>
+<text x="1750.0" y="560.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Container: API] — RF-03, 04</text>
+<rect x="1510" y="600" width="480" height="90" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1750.0" y="641.0" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">CronJob Atualização de Preços</text>
+<text x="1750.0" y="662.0" font-size="11" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Container: Job agendado] — ADR-0004</text>
+<rect x="400" y="735" width="520" height="250" rx="10" fill="none" stroke="#5FA8D3" stroke-width="1.5" stroke-dasharray="6,5"/>
+<text x="420" y="769" font-size="14" font-weight="700" fill="#2E75B6">ns: integracao-ea</text>
+<rect x="420" y="775" width="480" height="190" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="660.0" y="857.5" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">Adaptador BiZZdesign</text>
+<text x="660.0" y="880.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Container: Consumer assíncrono]</text>
+<text x="660.0" y="898.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">ADR-0003</text>
+<rect x="945" y="735" width="520" height="250" rx="10" fill="none" stroke="#5FA8D3" stroke-width="1.5" stroke-dasharray="6,5"/>
+<text x="965" y="769" font-size="14" font-weight="700" fill="#2E75B6">ns: dashboard</text>
+<rect x="965" y="775" width="480" height="190" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1205.0" y="857.5" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">Serviço de Dashboard</text>
+<text x="1205.0" y="880.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Container: API de leitura]</text>
+<text x="1205.0" y="898.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">RF-08</text>
+<rect x="1490" y="735" width="520" height="250" rx="10" fill="none" stroke="#5FA8D3" stroke-width="1.5" stroke-dasharray="6,5"/>
+<text x="1510" y="769" font-size="14" font-weight="700" fill="#2E75B6">ns: platform</text>
+<rect x="1510" y="780" width="225" height="85" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1622.5" y="818.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Argo CD</text>
+<text x="1622.5" y="838.5" font-size="10" font-weight="400" fill="#FFFFFF" text-anchor="middle">[GitOps — ADR-0007]</text>
+<rect x="1755" y="780" width="225" height="85" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1867.5" y="816.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">External Secrets</text>
+<text x="1867.5" y="836.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Operator</text>
+<rect x="1510" y="880" width="225" height="85" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1622.5" y="918.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Karpenter</text>
+<text x="1622.5" y="938.5" font-size="10" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Autoscaling de nós]</text>
+<rect x="1755" y="880" width="225" height="85" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1867.5" y="916.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Prometheus /</text>
+<text x="1867.5" y="936.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Fluent Bit</text>
+<rect x="370" y="1040" width="1660" height="190" rx="10" fill="none" stroke="#2E75B6" stroke-width="2.5" stroke-dasharray="10,6"/>
+<text x="390" y="1074" font-size="17" font-weight="700" fill="#1B4F72">Nó de Implantação: Camada de Dados (subnets privadas)</text>
+<rect x="400" y="1085" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="575.0" y="1132.5" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">RDS PostgreSQL Multi-AZ</text>
+<text x="575.0" y="1153.5" font-size="11" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Database] — schema por tenant</text>
+<text x="575.0" y="1170.5" font-size="11" font-weight="400" fill="#FFFFFF" text-anchor="middle">ADR-0001</text>
+<rect x="790" y="1085" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="965.0" y="1132.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">ElastiCache Redis</text>
+<text x="965.0" y="1154.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Cache] — preços de nuvem</text>
+<text x="965.0" y="1172.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">ADR-0004</text>
+<rect x="1180" y="1085" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1355.0" y="1141.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Amazon SNS</text>
+<text x="1355.0" y="1163.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Topic] — barramento de eventos</text>
+<rect x="1570" y="1085" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1745.0" y="1131.5" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">Amazon SQS + DLQ</text>
+<text x="1745.0" y="1152.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Queue] — fila BiZZdesign</text>
+<text x="1745.0" y="1170.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">ADR-0003</text>
+<rect x="370" y="1270" width="1660" height="190" rx="10" fill="none" stroke="#2E75B6" stroke-width="2.5" stroke-dasharray="10,6"/>
+<text x="390" y="1304" font-size="17" font-weight="700" fill="#1B4F72">Nó de Implantação: Plataforma &amp; Segurança AWS</text>
+<rect x="400" y="1315" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="575.0" y="1371.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Amazon ECR</text>
+<text x="575.0" y="1393.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Registro de imagens]</text>
+<rect x="790" y="1315" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="965.0" y="1370.5" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">Secrets Manager + KMS</text>
+<text x="965.0" y="1391.5" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Segredos / Chaves]</text>
+<rect x="1180" y="1315" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1355.0" y="1370.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">CloudWatch / AMP / AMG</text>
+<text x="1355.0" y="1390.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Observabilidade]</text>
+<rect x="1570" y="1315" width="350" height="120" rx="10" fill="#4A90D9" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="1745.0" y="1371.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">IAM + IRSA</text>
+<text x="1745.0" y="1393.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Identidade de workload]</text>
+<rect x="2100" y="460" width="380" height="110" rx="10" fill="#95A5A6" stroke="#7B8788" stroke-width="1.5"/>
+<text x="2290.0" y="511.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Provedor de Identidade</text>
+<text x="2290.0" y="533.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">do tenant [Sistema Externo]</text>
+<rect x="2100" y="610" width="380" height="110" rx="10" fill="#95A5A6" stroke="#7B8788" stroke-width="1.5"/>
+<text x="2290.0" y="661.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">APIs de Precificação</text>
+<text x="2290.0" y="683.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">de Nuvem [Sistema Externo]</text>
+<rect x="2100" y="760" width="380" height="110" rx="10" fill="#95A5A6" stroke="#7B8788" stroke-width="1.5"/>
+<text x="2290.0" y="811.0" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">BiZZdesign</text>
+<text x="2290.0" y="833.0" font-size="12" font-weight="400" fill="#FFFFFF" text-anchor="middle">[Sistema Externo]</text>
+<path d="M 300,215 L 400,295" fill="none" stroke="#333333" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="301" y="234" width="58.400000000000006" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="305" y="250" font-size="15" fill="#333333" text-anchor="start">acessa</text>
+<path d="M 750,295 L 790,295" fill="none" stroke="#333333" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 965,235 L 965,210 L 1745,210 L 1745,235" fill="none" stroke="#333333" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="1236" y="189" width="125.60000000000001" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="1240" y="205" font-size="15" fill="#333333" text-anchor="start">serve estático</text>
+<path d="M 1140,295 L 1180,295" fill="none" stroke="#333333" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 1355,355 L 1355,410" fill="none" stroke="#333333" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="1076" y="384" width="226.4" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="1080" y="400" font-size="15" fill="#333333" text-anchor="start">Ingress roteia por domínio</text>
+<path d="M 765,1020 L 765,1040" fill="none" stroke="#333333" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="556" y="1019" width="125.60000000000001" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="560" y="1035" font-size="15" fill="#333333" text-anchor="start">lê/grava dados</text>
+<path d="M 1155,1020 L 1155,1270" fill="none" stroke="#333333" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="1156" y="1236" width="182.72000000000003" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="1160" y="1250" font-size="12" fill="#333333" text-anchor="start">usa: ECR, Secrets Manager,</text>
+<rect x="1156" y="1250" width="142.4" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="1160" y="1264" font-size="12" fill="#333333" text-anchor="start">IAM/IRSA, CloudWatch</text>
+<path d="M 2030,515 L 2100,515" fill="none" stroke="#333333" stroke-width="2.5" stroke-dasharray="9,6" marker-end="url(#arrow)"/>
+<rect x="2034.12" y="484" width="61.760000000000005" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="2065" y="500" font-size="12" fill="#333333" text-anchor="middle">ADR-0002</text>
+<path d="M 2030,665 L 2100,665" fill="none" stroke="#333333" stroke-width="2.5" stroke-dasharray="9,6" marker-end="url(#arrow)"/>
+<rect x="2034.12" y="634" width="61.760000000000005" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="2065" y="650" font-size="12" fill="#333333" text-anchor="middle">ADR-0004</text>
+<path d="M 2030,815 L 2100,815" fill="none" stroke="#333333" stroke-width="2.5" stroke-dasharray="9,6" marker-end="url(#arrow)"/>
+<rect x="2034.12" y="784" width="61.760000000000005" height="20" fill="#FFFFFF" opacity="0.92"/>
+<text x="2065" y="800" font-size="12" fill="#333333" text-anchor="middle">ADR-0003</text>
+<text x="40" y="1510" font-size="19" font-weight="700" fill="#111111">Legenda</text>
+<rect x="40" y="1524" width="26" height="20" rx="4" fill="#1B4F72"/>
+<text x="76" y="1540" font-size="15" fill="#333333">Pessoa</text>
+<rect x="174" y="1524" width="26" height="20" rx="4" fill="#4A90D9"/>
+<text x="210" y="1540" font-size="15" fill="#333333">Container (software em execução)</text>
+<rect x="516" y="1524" width="26" height="20" rx="4" fill="#95A5A6"/>
+<text x="552" y="1540" font-size="15" fill="#333333">Sistema externo</text>
+<rect x="722" y="1524" width="26" height="20" rx="4" fill="none" stroke="#2E75B6" stroke-width="2" stroke-dasharray="6,4"/>
+<text x="758" y="1540" font-size="15" fill="#333333">Nó de implantação (infraestrutura)</text>
+<text x="40" y="1580" font-size="14" fill="#555555" font-style="italic">Este diagrama mostra ONDE cada container é implantado. O detalhe de COMO os containers se comunicam entre si (chamadas, filas, eventos) está no Diagrama de Containers.</text>
+</svg>

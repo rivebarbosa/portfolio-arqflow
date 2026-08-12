@@ -1,9 +1,10 @@
 # Diagramas
 
-Diagramas em modelo **C4** (Contexto → Containers), feitos em [draw.io](https://app.diagrams.net/) (arquivos `.drawio`, editáveis, com export em PNG para visualização direta aqui no GitHub).
+Diagramas em modelo **C4** (Contexto → Containers → Implantação). Os dois primeiros níveis foram feitos em [draw.io](https://app.diagrams.net/) (arquivos `.drawio`, editáveis, com export em PNG); o nível de Implantação é um SVG gerado programaticamente (ver nota no final desta página).
 
 1. [`contexto.drawio`](contexto.drawio) / ![preview](contexto.png) — ArqFlow e seus atores/sistemas externos: solicitante de demanda, arquiteto de soluções, gestor/PMO, provedor de identidade do cliente, BiZZdesign e as APIs de precificação de nuvem
 2. [`containers.drawio`](containers.drawio) / ![preview](containers.png) — os serviços internos definidos nos ADRs ([0001](../03-decisoes-arquiteturais/0001-multi-tenancy-schema-por-tenant.md)–[0004](../03-decisoes-arquiteturais/0004-motor-de-custeio-com-cache-de-precos.md)) e como se comunicam
+3. [`implantacao-c4.svg`](implantacao-c4.svg) — onde cada container roda em AWS/EKS, detalhado nos ADRs [0005](../03-decisoes-arquiteturais/0005-eks-como-orquestrador-de-containers.md)–[0007](../03-decisoes-arquiteturais/0007-gitops-com-argocd-para-entrega-continua.md)
 
 ## Diagrama de Contexto
 
@@ -23,6 +24,10 @@ Diagramas em modelo **C4** (Contexto → Containers), feitos em [draw.io](https:
 
 ---
 
-## Diagrama de implantação (AWS/Kubernetes)
+## Diagrama de Implantação (C4 - Deployment)
 
-O diagrama de infraestrutura — como esses containers são implantados em AWS/EKS — está em [`06-implantacao-e-operacao/arquitetura-aws.md`](../06-implantacao-e-operacao/arquitetura-aws.md), como diagrama Mermaid (para manter renderização nativa no GitHub sem depender de export manual, diferente dos diagramas C4 acima, que são draw.io).
+![Diagrama de Implantação - ArqFlow em AWS/EKS](implantacao-c4.svg)
+
+**Leitura:** este é o terceiro nível do modelo C4 — mostra *onde* cada container do diagrama acima roda (namespace do EKS, serviço gerenciado da AWS), não *como* eles se comunicam entre si (isso já está no Diagrama de Containers). Detalhado, com o raciocínio por trás de cada escolha, em [`06-implantacao-e-operacao/arquitetura-aws.md`](../06-implantacao-e-operacao/arquitetura-aws.md).
+
+**Nota técnica:** ao contrário dos dois diagramas acima (draw.io), este é um SVG gerado programaticamente com posicionamento fixo de cada elemento. A primeira versão deste diagrama foi feita em Mermaid; com muitos namespaces aninhados, o renderizador do GitHub calculava um layout automático que sobrepunha caixas e texto. Trocar para SVG com coordenadas explícitas eliminou o problema — uma escolha pragmática de ferramenta, não uma mudança na notação C4 em si.
