@@ -17,7 +17,7 @@ Sou **Roberto Rivelino Barbosa**, Arquiteto de Soluções Sênior, com experiên
 
 | Etapa | Documento | O que você vai encontrar |
 |---|---|---|
-| 1. Discovery | [`docs/01-discovery/`](docs/01-discovery/README.md) | Contexto de negócio, stakeholders, perguntas feitas e premissas assumidas |
+| 1. Discovery | [`docs/01-discovery/`](docs/01-discovery/README.md) | Contexto de negócio, stakeholders, perguntas feitas, premissas assumidas e o processo de demanda modelado em BPMN 2.0 |
 | 2. Requisitos | [`docs/02-requisitos/`](docs/02-requisitos/requisitos-funcionais.md) | Requisitos funcionais e não funcionais, com critérios de aceite mensuráveis |
 | 3. Decisões | [`docs/03-decisoes-arquiteturais/`](docs/03-decisoes-arquiteturais/) | ADRs — cada decisão relevante, alternativas consideradas e motivo da escolha |
 | 4. Diagramas | [`docs/04-diagramas/`](docs/04-diagramas/README.md) | Modelo C4 (contexto e containers), feitos em draw.io |
