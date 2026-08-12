@@ -7,6 +7,7 @@ A diferença central deste caso: ArqFlow não é um sistema com um único dono (
 1. [`contexto-negocio.md`](contexto-negocio.md) — o problema, objetivo de negócio e métricas de sucesso
 2. [`stakeholders.md`](stakeholders.md) — mapa de stakeholders (incluindo os stakeholders *dos clientes*, não só os internos)
 3. [`perguntas-discovery.md`](perguntas-discovery.md) — perguntas feitas, respostas obtidas e premissas assumidas
+4. [`processo-demanda-arquitetura.md`](processo-demanda-arquitetura.md) — o processo de trabalho que o produto automatiza, modelado em BPMN 2.0, e o mapeamento de cada atividade para o requisito que a cobre
 
 ## Metodologia usada
 
