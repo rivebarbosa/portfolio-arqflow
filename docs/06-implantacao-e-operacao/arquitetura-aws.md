@@ -4,88 +4,9 @@ Esta arquitetura implanta os serviços definidos em [`04-diagramas/containers.pn
 
 ## Diagrama
 
-```mermaid
-flowchart TB
-    subgraph Internet["Internet"]
-        User["Arquiteto / Gestor / Solicitante"]
-        IdP["IdP do tenant (Azure AD, Okta, Google Workspace)"]
-        BizZ["BiZZdesign"]
-        CloudAPIs["APIs de precificação das clouds"]
-    end
+![Diagrama de Implantação (C4 - Deployment) - ArqFlow em AWS/EKS](../04-diagramas/implantacao-c4.svg)
 
-    subgraph Edge["Borda AWS"]
-        R53["Route 53"]
-        CF["CloudFront + WAF"]
-        S3Front["S3 (frontend estático SPA)"]
-    end
-
-    subgraph VPC["VPC (multi-AZ)"]
-        subgraph Public["Subnets públicas"]
-            ALB["ALB (AWS Load Balancer Controller)"]
-            NAT["NAT Gateway"]
-        end
-
-        subgraph EKS["EKS Cluster"]
-            subgraph nsIdentidade["ns: identidade"]
-                GW["Gateway de Identidade (broker OIDC/SAML)"]
-            end
-            subgraph nsDemanda["ns: demanda-cenario"]
-                Demanda["Serviço de Demanda/Cenário"]
-            end
-            subgraph nsCusteio["ns: custeio"]
-                Custeio["Motor de Custeio"]
-                CronPrecos["CronJob: atualização de preços"]
-            end
-            subgraph nsIntegracao["ns: integracao-ea"]
-                IntegracaoEA["Adaptador BiZZdesign"]
-            end
-            subgraph nsDashboard["ns: dashboard"]
-                Dashboard["Serviço de Dashboard"]
-            end
-            subgraph nsPlatform["ns: platform"]
-                ArgoCD["Argo CD"]
-                ExtSecrets["External Secrets Operator"]
-                Karpenter["Karpenter"]
-                Prom["Prometheus / Fluent Bit"]
-            end
-        end
-
-        subgraph Private["Subnets privadas — dados"]
-            RDS[("RDS PostgreSQL Multi-AZ\nschema por tenant")]
-            Redis[("ElastiCache Redis\ncache de preços")]
-            SQS["SQS + DLQ\n(fila BiZZdesign)"]
-            SNS["SNS\n(barramento de eventos)"]
-        end
-    end
-
-    subgraph AWSPlatform["Serviços de plataforma AWS"]
-        ECR["ECR (imagens)"]
-        SecretsMgr["Secrets Manager + KMS"]
-        CW["CloudWatch / AMP / AMG"]
-        IAM["IAM + IRSA"]
-    end
-
-    User --> R53 --> CF
-    CF --> S3Front
-    CF --> ALB --> nsIdentidade
-    ALB --> nsDemanda
-    ALB --> nsDashboard
-
-    nsIdentidade <-. federa .-> IdP
-    nsDemanda --> RDS
-    nsDashboard --> RDS
-    nsCusteio --> Redis
-    CronPrecos -.-> CloudAPIs
-    nsDemanda -- publica aprovação --> SNS --> SQS --> nsIntegracao
-    nsIntegracao <-. sincroniza .-> BizZ
-    nsIntegracao -. DLQ + alarme .-> CW
-
-    ExtSecrets --> SecretsMgr
-    nsIdentidade -. IRSA .-> IAM
-    nsIntegracao -. IRSA .-> IAM
-    EKS --> ECR
-    Prom --> CW
-```
+*(SVG — nível C4 de Implantação/Deployment, mesma notação usada em [`04-diagramas/`](../04-diagramas/README.md); mostra onde cada container roda, não como eles se comunicam entre si — isso está no [Diagrama de Containers](../04-diagramas/containers.png).)*
 
 **Leitura do diagrama:** o frontend (SPA) é servido estático via CloudFront + S3, protegido por WAF (regras gerenciadas OWASP). Toda chamada de API passa pelo ALB e entra no cluster via um namespace de domínio — nunca existe um caminho que fale diretamente com o banco ou com um sistema de terceiros sem passar por um serviço interno. O Gateway de Identidade é o único ponto que federa com o IdP do cliente (ADR-0002); o Adaptador BiZZdesign é o único que fala com a BiZZdesign, sempre a partir de uma fila (ADR-0003), nunca de forma síncrona.
 
