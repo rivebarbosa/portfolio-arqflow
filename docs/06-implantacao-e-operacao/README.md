@@ -7,6 +7,7 @@ Esta seção documenta como o ArqFlow roda em produção: a infraestrutura AWS d
 | [`arquitetura-aws.md`](arquitetura-aws.md) | Arquitetura de referência na AWS — rede, EKS, dados, mensageria, segurança, observabilidade — com diagrama |
 | [`kubernetes-boas-praticas.md`](kubernetes-boas-praticas.md) | Como o cluster é organizado e operado: namespaces, RBAC, rede, segredos, autoscaling, entrega progressiva |
 | [`esteira-cicd.md`](esteira-cicd.md) | A esteira de CI/CD: da branch ao deploy em produção, com gates de qualidade e segurança |
+| [`estimativa-finops.md`](estimativa-finops.md) | Estimativa de custo mensal da infraestrutura (baseline e otimizado), com custo marginal por tenant |
 
 ## Como esta seção se conecta ao resto do portfólio
 

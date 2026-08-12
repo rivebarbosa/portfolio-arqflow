@@ -36,6 +36,10 @@ VPC multi-AZ (mínimo 3 AZs) com subnets públicas (ALB, NAT Gateway) e subnets 
 
 CloudWatch Container Insights e Fluent Bit para logs centralizados; Amazon Managed Prometheus (AMP) e Amazon Managed Grafana (AMG) para métricas; toda métrica e log carrega o identificador de tenant e o namespace de domínio como atributo — a forma de investigar um incidente específico de um cliente em um ambiente de compute compartilhado (consequência direta do [ADR-0006](../03-decisoes-arquiteturais/0006-isolamento-multi-tenant-por-dominio-nao-por-tenant.md)).
 
+## Estimativa de custo (FinOps)
+
+Estimativa de custo mensal desta arquitetura, com cenário otimizado e custo marginal por tenant adicional, em [`estimativa-finops.md`](estimativa-finops.md).
+
 ## Infraestrutura como código
 
 Terraform, organizado em módulos por camada (rede, EKS, dados, mensageria, IAM), com state remoto em S3 e lock via DynamoDB. `checkov`/`tfsec` roda como gate na esteira antes de qualquer `apply` (ver [`esteira-cicd.md`](esteira-cicd.md#pipeline-de-infraestrutura)). Ambientes (dev/staging/prod) são workspaces/state files separados, não uma única infraestrutura compartilhada com `if` de ambiente espalhado pelo código.
