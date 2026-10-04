@@ -1,79 +1,71 @@
 # Estimativa FinOps da Infraestrutura
 
-Ironia bem-vinda: o ArqFlow vende aos seus clientes a capacidade de estimar custo de infraestrutura por cenário ([RF-03](../02-requisitos/requisitos-funcionais.md#rf-03--cotação-de-custo-finops-por-cenário), [ADR-0004](../03-decisoes-arquiteturais/0004-motor-de-custeio-com-cache-de-precos.md)). Este documento aplica a mesma disciplina à própria infraestrutura do produto: uma estimativa de custo mensal para a arquitetura descrita em [`arquitetura-aws.md`](arquitetura-aws.md), com premissas explícitas, exatamente como o RNF de custeio do produto exige das estimativas que ele mesmo gera.
+Ironia bem-vinda: o ArqFlow vende a capacidade de estimar custo de infraestrutura por cenário ([RF-03](../02-requisitos/requisitos-funcionais.md#rf-03--cotação-de-custo-finops-por-cenário), [ADR-0004](../03-decisoes-arquiteturais/0004-motor-de-custeio-com-cache-de-precos.md)). Este documento aplica a mesma disciplina à própria infraestrutura: uma estimativa mensal da arquitetura descrita em [`arquitetura-azure.md`](arquitetura-azure.md), com premissas e confiabilidade declaradas.
 
 ## Metodologia e premissas
 
-- **Região:** `us-east-1`, preço sob demanda (*on-demand*), sem desconto de suporte AWS, sem impostos, sem tarifa de transferência de dados entre AZs.
-- **Data de referência dos preços:** agosto de 2026, levantados via pesquisa (ver fontes ao final). Assim como o Motor de Custeio do próprio ArqFlow, esta é uma estimativa com data de referência declarada, não uma cotação em tempo real — a mesma justificativa do [ADR-0004](../03-decisoes-arquiteturais/0004-motor-de-custeio-com-cache-de-precos.md) (defasagem aceitável em troca de velocidade e reprodutibilidade) se aplica aqui.
-- **Estágio do produto:** piloto, 3–5 tenants (consistente com o contexto já assumido no [ADR-0002](../03-decisoes-arquiteturais/0002-federacao-de-identidade-via-gateway-oidc.md)), tráfego baixo, sem carga de produção em escala.
-- **Não incluído:** custo de desenvolvimento/pessoas, licenciamento de terceiros (ex: eventual custo da própria integração com a BiZZdesign), ambientes de dev/staging (esta estimativa cobre um único ambiente de produção).
+- **Região:** Brazil South, preço sob demanda (pay-as-you-go), em US$, sem impostos, sem transferência de dados entre zonas.
+- **Data de referência:** outubro de 2026.
+- **Confiabilidade por linha:** a coluna "Fonte" diz de onde veio cada valor.
+    - **API** — consultado na [Azure Retail Prices API](https://prices.azure.com/api/retail/prices) para Brazil South em 03/10/2026.
+    - **Página** — publicado na página de preços do serviço.
+    - **Aprox.** — ordem de grandeza a partir do preço público de referência (East US); Brazil South costuma ser mais cara. Precisa ser conferido na [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) antes de qualquer decisão de orçamento.
+- **Estágio:** piloto em uma única empresa, tráfego baixo, um ambiente de produção (dev/hml fora da conta).
+- **Não incluído:** Sensedia e Entra ID (plataformas corporativas já licenciadas e compartilhadas entre aplicações), pessoas, licença da BiZZdesign.
 
 ## Baseline sob demanda
 
-| Componente | Configuração | Custo/mês (US$) |
-| --- | --- | --- |
-| EKS — control plane | 1 cluster | 73,00 |
-| EC2 — node group gerenciado | 3× `m6g.large` (1 por AZ, carga estável) | 168,63 |
-| EC2 — Karpenter (spot) | ~2× `m6g.large` equivalente, rajada (worker de integração EA, jobs) | 33,58 |
-| RDS PostgreSQL Multi-AZ | `db.r6g.large` + 100GB gp3 (schema por tenant, ADR-0001) | 340,00 |
-| ElastiCache Redis | `cache.t4g.medium`, nó único (cache de preços, ADR-0004) | 47,45 |
-| NAT Gateway | 3× (1 por AZ) + ~50GB processados/mês | 100,80 |
-| ALB | base + ~1 LCU médio | 22,27 |
-| CloudFront + S3 (frontend) | dentro do free tier (< 1TB/mês) | 3,00 |
-| SNS + SQS + DLQ | dentro do free tier (< 1M mensagens/mês) | 0,00 |
-| Secrets Manager | ~15 segredos (credenciais de banco, tokens BiZZdesign/IdP por tenant) | 7,00 |
-| ECR | ~20GB de imagens de container | 2,00 |
-| Route 53 | 1 hosted zone + queries | 1,50 |
-| KMS | 2–3 CMKs + requests | 3,00 |
-| CloudWatch Logs | ~15GB ingeridos/mês (após free tier) | 5,50 |
-| Amazon Managed Prometheus | cluster pequeno (~5 nós, cardinalidade moderada) | 40,00 |
-| Amazon Managed Grafana | 2 editores + 3 leitores | 33,00 |
-| **Total estimado** | | **≈ US$ 880/mês** |
+| Componente | Configuração | US$/mês | Fonte |
+| --- | --- | --- | --- |
+| AKS — control plane | Tier Standard (SLA), 1 cluster | ≈ 73 | Aprox. |
+| Node pool estável | 3× `Standard_D2s_v5` Linux (1 por zona), US$ 0,153/h | 335 | API |
+| Node Auto Provisioning (Spot) | ~2× `Standard_D2s_v5` Spot, US$ 0,028274/h | 41 | API |
+| PostgreSQL Flexible Server | General Purpose 2 vCores, HA zone-redundant, 128 GiB | ≈ 290 | Aprox. |
+| Azure Cache for Redis | 2× Standard C0 (sessão e preços, instâncias separadas) | ≈ 80 | Aprox. |
+| Azure Service Bus | Premium, 1 messaging unit (exigido para Private Endpoint) | ≈ 677 | Aprox. |
+| Azure Front Door Premium | Taxa base (exigida para origem por Private Link) + requisições/dados de piloto | ≈ 340 | Página (base US$ 330) |
+| Private Endpoints | 7 (PostgreSQL, 2× Redis, Service Bus, Key Vault, Blob, ACR) | ≈ 51 | Aprox. |
+| Azure Container Registry | Premium (exigido para Private Endpoint) | ≈ 50 | Aprox. |
+| NAT Gateway | 1 + ~50 GB processados | ≈ 35 | Aprox. |
+| Load balancer interno + Private Link Service | Standard LB (o Private Link Service não tem cobrança própria) | ≈ 18 | Aprox. |
+| Microsoft Defender for Containers | 6 vCores | ≈ 42 | Aprox. |
+| Log Analytics | ~15 GB ingeridos/mês | ≈ 25 | Aprox. |
+| Azure Monitor managed Prometheus | cluster pequeno | ≈ 15 | Aprox. |
+| Azure Managed Grafana | Standard, ~5 usuários | ≈ 80 | Aprox. |
+| Key Vault + Blob Storage | operações e armazenamento de piloto | ≈ 4 | Aprox. |
+| **Total estimado** | | **≈ US$ 2.160/mês** | |
 
-## Cenário otimizado
+**O que mais pesa:** Service Bus Premium (≈ 31%) e Front Door Premium (≈ 16%). Os dois estão na conta pelo mesmo motivo: a arquitetura de referência exige origens privadas, e nesses serviços Private Link/Private Endpoint só existe no tier Premium. É o custo explícito do princípio "nenhuma origem exposta à internet".
 
-Aplicando três alavancas de FinOps clássicas — sem mudar nenhuma decisão arquitetural, só o modelo de compra e uma escolha de disponibilidade:
+## Cenários otimizados
 
-| Alavanca | O que muda | Trade-off |
-| --- | --- | --- |
-| Savings Plan / Reserved Instance (1 ano, sem pagamento antecipado) | EC2 do node group gerenciado, RDS e ElastiCache passam de sob demanda para reservado | Compromisso de 1 ano — só vale a pena porque o piloto já validou que o produto continua em operação |
-| NAT Gateway único (em vez de 1 por AZ) | Reduz de 3 para 1 NAT Gateway | Perda de redundância de egress por AZ — aceitável em piloto, **não** aceitável quando o RNF de disponibilidade de 99,5% valer para todos os tenants em produção geral |
-| Nenhuma mudança nos serviços gerenciados de baixo custo (Secrets Manager, ECR, Route 53, KMS) | — | Já estão perto do piso de custo possível; otimizar aqui não move a agulha |
+| Alavanca | O que muda | Economia | Trade-off |
+| --- | --- | --- | --- |
+| Reserva de 1 ano | Node pool estável e compute do PostgreSQL passam para instância reservada (≈ 35% de desconto, a confirmar por SKU) | ≈ US$ 210 | Compromisso de 1 ano — só depois que o piloto validar a continuidade |
+| Service Bus Standard | Troca Premium por Standard (≈ US$ 10/mês) | ≈ US$ 667 | Perde o Private Endpoint: o namespace fica acessível pelo endpoint público, protegido só por Entra ID (managed identity) e TLS. **Fere o princípio de origens privadas da referência — exige ADR de exceção** |
+| Front Door compartilhado | Um perfil Front Door Premium para várias aplicações da empresa, com rotas por domínio | até US$ 330 por aplicação adicional | Governança do perfil compartilhado (dono, WAF comum) passa para o time de plataforma |
 
-| | Baseline sob demanda | Cenário otimizado |
-| --- | --- | --- |
-| **Total/mês** | ≈ US$ 880 | ≈ US$ 654 |
-| **Economia** | — | ≈ 26% (US$ 227/mês) |
+| | Baseline | Otimizado (mantém a referência) | Otimizado com exceção no Service Bus |
+| --- | --- | --- | --- |
+| **Total/mês** | ≈ US$ 2.160 | ≈ US$ 1.950 | ≈ US$ 1.280 |
+| **Economia** | — | ≈ 10% | ≈ 41% |
 
-## Custo marginal por tenant adicional
+A recomendação para o piloto é o cenário do meio: manter a referência e aplicar só a reserva. A exceção no Service Bus deve ser decidida explicitamente, porque troca US$ 667/mês por uma origem pública.
 
-Esta é a linha que mais vale a pena levar para uma conversa de pré-vendas: como o compute é compartilhado por domínio e não replicado por tenant ([ADR-0006](../03-decisoes-arquiteturais/0006-isolamento-multi-tenant-por-dominio-nao-por-tenant.md)), o custo marginal de aceitar mais um cliente-piloto é, em essência, o custo de mais um schema e mais alguns segredos — não o custo de mais um conjunto inteiro de containers.
+## Custo da arquitetura de referência por aplicação
 
-- Armazenamento adicional (novo schema): ~2–5GB × US$ 0,115/GB ≈ **US$ 0,25–0,60/mês**
-- Segredos adicionais (client secret do IdP, token da BiZZdesign se aplicável): 2 × US$ 0,40 ≈ **US$ 0,80/mês**
-- Compute: absorvido pela capacidade já provisionada até um limiar de escala (o HPA/Karpenter só adiciona nó quando a utilização real exigir)
+Com um único cliente (a própria empresa), a pergunta de FinOps que substitui o antigo "custo marginal por tenant" é: **quanto custa cada nova aplicação que adota a mesma arquitetura de referência?** Parte da conta já é compartilhada — Sensedia, Entra ID e, se a empresa decidir, o perfil do Front Door Premium. O custo que fica com cada aplicação é o do BFF, do Redis de sessão e dos Private Endpoints dos seus próprios dados, não o da borda inteira.
 
-**Custo marginal estimado por tenant, em regime de piloto: ~US$ 1–2/mês**, até o próximo limiar de escala de compute (cada nó adicional de `m6g.large` amortizado entre todos os tenants ativos naquele momento, ~US$ 56/mês dividido pelo número de tenants).
+## Comparação com a estimativa anterior (AWS)
 
-Essa é a validação numérica, em dólares, da alternativa que o [ADR-0006](../03-decisoes-arquiteturais/0006-isolamento-multi-tenant-por-dominio-nao-por-tenant.md) rejeitou: se o isolamento multi-tenant tivesse sido feito por namespace-por-tenant (replicando o conjunto completo de serviços a cada cliente novo), o custo marginal por tenant seria da ordem de **centenas de dólares por mês** (um EKS node group e réplicas de todos os 6 serviços por cliente), não de dólares — o mesmo argumento de escala que já havia rejeitado banco dedicado por tenant no ADR-0001, agora quantificado para a camada de compute.
+A estimativa para AWS/EKS em `us-east-1` era ≈ US$ 880/mês. Os números não são comparáveis diretamente: a região mudou (Brazil South costuma ser mais cara que regiões dos EUA) e a arquitetura de referência exige tiers Premium para origens privadas que o desenho AWS não tinha. A diferença é, na maior parte, o preço do isolamento de rede e da borda gerenciada — não do compute.
 
 ## Confiabilidade desta estimativa
 
-Assim como o ArqFlow exibe a data de referência de cada estimativa de custo ao usuário (RF-03), este documento declara a sua: os valores acima foram levantados via pesquisa em agosto de 2026 e são uma estimativa de ordem de grandeza — suficiente para uma decisão de arquitetura e para uma conversa de pré-vendas, não uma fatura. Para uma cotação vinculante, o próximo passo é montar esta mesma configuração na [AWS Pricing Calculator](https://calculator.aws) ou solicitar um *Well-Architected Review*/estimativa formal via AWS.
+É uma estimativa de ordem de grandeza, suficiente para decidir arquitetura e discutir as alavancas acima, não uma fatura. Apenas as linhas marcadas como **API** e **Página** foram conferidas em fonte primária; as demais precisam ser validadas na Azure Pricing Calculator para Brazil South antes de virar orçamento.
 
-### Fontes consultadas (agosto de 2026)
+### Fontes consultadas (outubro de 2026)
 
-- [Amazon EKS Pricing](https://aws.amazon.com/eks/pricing/) — control plane
-- [EC2 On-Demand Instance Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) — `m6g.large`
-- [Amazon RDS Pricing](https://aws.amazon.com/rds/postgresql/pricing/) — `db.r6g.large` Multi-AZ, storage gp3
-- [Amazon ElastiCache Pricing](https://aws.amazon.com/elasticache/pricing/) — `cache.t4g.medium`
-- [Amazon VPC Pricing](https://aws.amazon.com/vpc/pricing/) — NAT Gateway
-- [Elastic Load Balancing Pricing](https://aws.amazon.com/elasticloadbalancing/pricing/) — ALB / LCU
-- [Amazon CloudFront Pricing](https://aws.amazon.com/cloudfront/pricing/) — transferência de dados
-- [AWS Secrets Manager Pricing](https://aws.amazon.com/secrets-manager/pricing/)
-- [Amazon ECR Pricing](https://aws.amazon.com/ecr/pricing/)
-- [Amazon Route 53 Pricing](https://aws.amazon.com/route53/pricing/)
-- [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/) — Logs
-- [Amazon Managed Service for Prometheus](https://aws.amazon.com/prometheus/pricing/) e [Amazon Managed Grafana Pricing](https://aws.amazon.com/grafana/pricing/)
-- [Amazon SQS Pricing](https://aws.amazon.com/sqs/pricing/) e [Amazon SNS Pricing](https://aws.amazon.com/sns/pricing/)
+- [Azure Retail Prices API](https://prices.azure.com/api/retail/prices) — `Standard_D2s_v5` Linux e Spot, Brazil South
+- [Azure Front Door pricing](https://azure.microsoft.com/pricing/details/frontdoor/) — taxa base dos tiers Standard e Premium
+- [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) — referência para validar as linhas aproximadas

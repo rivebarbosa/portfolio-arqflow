@@ -9,10 +9,18 @@
 
 ## Identidade e acesso
 
+Seguem a arquitetura de referência SPA + BFF + OAuth 2.0/JWT ([ADR-0010](../03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md)).
+
 | Requisito | Alvo | Origem |
 |---|---|---|
-| Protocolos de SSO suportados | OIDC e SAML 2.0, sem integração ponto-a-ponto por provedor | [perguntas-discovery.md](../01-discovery/perguntas-discovery.md#quantos-provedores-de-identidade-diferentes-precisamos-suportar-no-dia-1) |
-| Tempo de configuração de um novo IdP por um tenant | Autoatendimento via painel administrativo, sem deploy de código | Consequência de RF-07 combinado com o modelo self-service de onboarding |
+| Provedor de identidade | Microsoft Entra ID corporativo, via OIDC (Authorization Code + PKCE) | Pivô para empresa única + arquitetura de referência |
+| Tokens no navegador | Nenhum: access, refresh e ID token ficam no BFF; o navegador recebe só um cookie `__Host-` `HttpOnly; Secure; SameSite` | ADR-0010 |
+| Autenticação do cliente OAuth | Certificado ou federated credential (Workload ID); client secret proibido em produção | ADR-0010 |
+| Vida do access token | 5 a 15 minutos, renovado pelo BFF com rotação do refresh token, sem ação do usuário | Arquitetura de referência |
+| Sessão | Expiração por inatividade de 30 min e absoluta de 8 h; ID de sessão renovado após o login | Arquitetura de referência |
+| Validação do JWT | Na Sensedia e em cada serviço: assinatura via JWKS em cache, `iss`, `aud`, `exp`/`nbf`, scopes/app roles | ADR-0010 (zero trust entre camadas) |
+| Proteção CSRF | Obrigatória em toda rota `/bff/*` que altera estado | Consequência do cookie de sessão |
+| Autorização | App roles do Entra ID (Solicitante, Arquiteto, Gestor/PMO), aplicadas no serviço | RF-07 |
 
 ## Integração com sistemas de terceiros (BiZZdesign)
 

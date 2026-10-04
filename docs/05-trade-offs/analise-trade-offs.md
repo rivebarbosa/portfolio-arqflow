@@ -8,13 +8,15 @@
 
 **O que perdemos:** simplicidade de migração de schema (agora multiplicada pelo número de tenants) e de consultas administrativas cross-tenant. Esse é um trade-off consciente de "mais trabalho operacional agora" em troca de "menos risco de vazamento entre clientes depois" — o tipo de troca que vale a pena quando o próprio modelo de negócio (B2B, vendendo a times de segurança/arquitetura) valoriza essa garantia mais do que a conveniência operacional.
 
-## Controle total vs. delegação a um componente especializado (identidade)
+## Token no navegador vs. sessão no servidor (identidade e BFF)
 
-**O que escolhemos:** gateway de identidade federada (ADR-0002) em vez de integrar cada IdP diretamente no core do produto.
+**O que escolhemos:** BFF como token handler, com Entra ID direto e Sensedia como API Gateway ([ADR-0010](../03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md)), substituindo o broker de identidade do ADR-0002.
 
-**O que ganhamos:** a complexidade de suportar N provedores de identidade não cresce linearmente com o código de negócio do ArqFlow — cresce na configuração de um componente especializado nisso.
+**O que ganhamos:** nenhum token acessível por JavaScript — um XSS na SPA não leva access token nem refresh token. O cliente OAuth é confidencial e se autentica por certificado, sem client secret. A validação do JWT acontece em duas camadas independentes (Sensedia e serviço), e o broker, que deixou de ter função com um único IdP, sai do desenho.
 
-**O que perdemos:** um ponto único de falha adicional (se o gateway cair, ninguém loga em nenhum tenant) e uma dependência de operar bem um componente de infraestrutura de segurança, que não é o core business do produto. Esse é o trade-off clássico de "build vs. delegar para um componente especializado" — aceito porque autenticação corporativa é um domínio maduro (protocolos padronizados), diferente de, por exemplo, o motor de custeio, que é uma diferenciação real do produto e por isso foi construído sob medida.
+**O que perdemos:** o BFF vira caminho crítico de todas as chamadas da SPA e passa a ter estado (sessão no Redis); o cookie de sessão reabre a necessidade de proteção CSRF; e existe um salto a mais (BFF) em toda chamada. É o mesmo princípio que aparece no resto do portfólio: preferir uma garantia estrutural (o token simplesmente não está no navegador) a uma garantia de processo (confiar que a SPA nunca terá um XSS).
+
+*Decisão anterior, mantida como histórico:* o ADR-0002 delegava a federação de N IdPs a um broker — trade-off que fazia sentido enquanto o ArqFlow era SaaS multi-tenant com IdPs variados por cliente.
 
 ## Consistência forte vs. resiliência a um sistema externo (integração BiZZdesign)
 
@@ -34,11 +36,13 @@
 
 ## Portabilidade e maturidade de plataforma vs. simplicidade operacional (orquestração)
 
-**O que escolhemos:** Amazon EKS (ADR-0005) em vez de ECS Fargate.
+**O que escolhemos:** Kubernetes gerenciado — Amazon EKS no ADR-0005, hoje Azure AKS pelo [ADR-0011](../03-decisoes-arquiteturais/0011-migrar-plataforma-de-aws-eks-para-azure-aks.md) — em vez de um orquestrador proprietário como o ECS Fargate.
 
 **O que ganhamos:** portabilidade real para um cluster Kubernetes fora da AWS se algum dia isso for exigido, e um ecossistema maduro (GitOps, entrega progressiva, autoscaling orientado a métricas de negócio) que fala a mesma língua dos times de plataforma dos clientes-alvo — relevante em um produto avaliado tecnicamente por esses mesmos times.
 
-**O que perdemos:** simplicidade operacional. EKS exige competência real de Kubernetes do time — RBAC, upgrade de versão, gestão de node groups — que o ECS Fargate dispensaria quase inteiramente. Esse é um trade-off consciente de "mais investimento em capacitação de plataforma agora" em troca de uma opcionalidade e de um ecossistema que só se pagam se o produto de fato escalar em número de serviços e de clientes enterprise sensíveis a portabilidade.
+**O que perdemos:** simplicidade operacional. Kubernetes gerenciado exige competência real de Kubernetes do time — RBAC, upgrade de versão, gestão de node groups — que o ECS Fargate dispensaria quase inteiramente. Esse é um trade-off consciente de "mais investimento em capacitação de plataforma agora" em troca de uma opcionalidade e de um ecossistema que só se pagam se o produto de fato escalar em número de serviços e de clientes enterprise sensíveis a portabilidade.
+
+A migração para o AKS (ADR-0011) foi o primeiro teste real dessa portabilidade: manifests, Helm charts, Argo CD, Argo Rollouts, KEDA e Kyverno foram reaproveitados; o que mudou foram os serviços gerenciados ao redor do cluster.
 
 ## Segurança estrutural vs. simplicidade de um único pipeline (entrega contínua)
 
@@ -50,4 +54,4 @@
 
 ## O padrão por trás desses trade-offs
 
-Em três das quatro decisões (identidade, integração BiZZdesign, custeio), a escolha foi **não assumir que um sistema externo é tão confiável ou controlável quanto o próprio produto** — seja um IdP de cliente, a API da BiZZdesign, ou a API de precificação de uma nuvem. Essa é a lição central deste caso de estudo: arquitetura de um produto B2B que integra com terceiros passa mais tempo desenhando para a *falha e a variabilidade* desses terceiros do que desenhando o "caminho feliz" interno. Nas decisões de implantação (orquestração e entrega contínua, [ADR-0005](../03-decisoes-arquiteturais/0005-eks-como-orquestrador-de-containers.md)–[ADR-0007](../03-decisoes-arquiteturais/0007-gitops-com-argocd-para-entrega-continua.md)), o mesmo princípio reaparece em outra forma: preferir garantias estruturais (credencial que não existe fora do cluster, isolamento que não depende de disciplina de query) a garantias de processo — mesmo quando isso custa mais investimento operacional agora.
+Em três das quatro decisões (identidade, integração BiZZdesign, custeio), a escolha foi **não assumir que um sistema externo é tão confiável ou controlável quanto o próprio produto** — seja um IdP de cliente, a API da BiZZdesign, ou a API de precificação de uma nuvem. Essa é a lição central deste caso de estudo: arquitetura de um produto B2B que integra com terceiros passa mais tempo desenhando para a *falha e a variabilidade* desses terceiros do que desenhando o "caminho feliz" interno. Nas decisões de implantação (orquestração e entrega contínua, [ADR-0005](../03-decisoes-arquiteturais/0005-eks-como-orquestrador-de-containers.md)–[ADR-0007](../03-decisoes-arquiteturais/0007-gitops-com-argocd-para-entrega-continua.md)), o mesmo princípio reaparece em outra forma: preferir garantias estruturais (credencial que não existe fora do cluster, isolamento que não depende de disciplina de query, token que não existe no navegador — [ADR-0010](../03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md)) a garantias de processo — mesmo quando isso custa mais investimento operacional agora.

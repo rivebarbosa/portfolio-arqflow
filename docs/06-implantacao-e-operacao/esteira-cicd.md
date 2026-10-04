@@ -13,7 +13,7 @@ flowchart LR
         Build["Build da imagem"]
         Test["Testes automatizados"]
         Scan["Scan de vulnerabilidade\n(Trivy) + SAST (CodeQL)"]
-        Push["Push para ECR\n(tag imutável = git sha)"]
+        Push["Push para ACR\n(tag imutável = git sha)"]
         UpdateManifest["Atualiza repositório\nde manifests (PR automático)"]
         Build --> Test --> Scan --> Push --> UpdateManifest
     end
@@ -39,7 +39,7 @@ Trunk-based: branches de feature curtas, PR obrigatório com revisão de outra p
 1. **Lint e testes unitários** — falha aqui bloqueia o PR antes de qualquer build de imagem, para dar feedback rápido.
 2. **Build da imagem** — multi-stage build, imagem final mínima (base *distroless* ou *slim*), sem ferramentas de build no artefato final.
 3. **Scan de segurança** — Trivy para vulnerabilidades de imagem/dependências, CodeQL (SAST) para o código. Vulnerabilidade crítica sem exceção documentada bloqueia o pipeline.
-4. **Push para ECR** com tag imutável (hash do commit, nunca `latest`) — rastreabilidade completa entre uma imagem em produção e o commit exato que a gerou.
+4. **Push para o Azure Container Registry (ACR)** com tag imutável (hash do commit, nunca `latest`) — rastreabilidade completa entre uma imagem em produção e o commit exato que a gerou.
 5. **Atualização do repositório de manifests** — a esteira abre um PR automático atualizando a tag da imagem no Helm values/kustomize daquele serviço; não aplica nada diretamente no cluster (ADR-0007).
 
 ## Pipeline de CD (Argo CD)
@@ -54,14 +54,14 @@ Kyverno (policy-as-code no próprio cluster) bloqueia, na admissão, qualquer ma
 
 ## Pipeline de infraestrutura (Terraform)
 
-Separado do pipeline de aplicação, com seu próprio ciclo: `terraform plan` roda em todo PR que toca módulos de infraestrutura, com `checkov`/`tfsec` validando políticas (ex: nenhum security group aberto para `0.0.0.0/0` em porta de banco, nenhum bucket S3 público). `terraform apply` em produção exige aprovação manual explícita, nunca automático — diferente do deploy de aplicação, mudança de infraestrutura tem blast radius maior e menos garantias de rollback automático.
+Separado do pipeline de aplicação, com seu próprio ciclo: `terraform plan` roda em todo PR que toca módulos de infraestrutura, com `checkov`/`tfsec` validando políticas (ex: nenhum NSG aberto para `0.0.0.0/0` em porta de banco, nenhuma Storage Account ou banco com acesso público habilitado). `terraform apply` em produção exige aprovação manual explícita, nunca automático — diferente do deploy de aplicação, mudança de infraestrutura tem blast radius maior e menos garantias de rollback automático.
 
 ## Rollback
 
 - **Aplicação:** reverter o commit correspondente no repositório de manifests — o Argo CD reconcilia de volta ao estado anterior. Não existe "re-execução manual de pipeline" como único caminho de rollback.
 - **Rollout em andamento:** abortado automaticamente pelo Argo Rollouts com base em métricas, sem esperar intervenção humana.
-- **Infraestrutura:** reverter o commit do módulo Terraform e reaplicar — por isso o state remoto (S3 + lock DynamoDB) e a disciplina de nunca aplicar Terraform fora da esteira são não negociáveis.
+- **Infraestrutura:** reverter o commit do módulo Terraform e reaplicar — por isso o state remoto (Azure Storage com lock por blob lease) e a disciplina de nunca aplicar Terraform fora da esteira são não negociáveis.
 
 ## Segurança de credenciais na esteira
 
-GitHub Actions se autentica na AWS via federação OIDC com uma IAM Role de permissão restrita (push em ECR, leitura/escrita no repositório de manifests) — nenhuma chave de acesso de longa duração é armazenada como secret do GitHub. Consistente com o [ADR-0007](../03-decisoes-arquiteturais/0007-gitops-com-argocd-para-entrega-continua.md): a esteira nunca tem, em nenhum momento, uma credencial de escrita direta no cluster de produção.
+GitHub Actions se autentica no Azure via federação OIDC (workload identity federation do Entra ID) com uma identidade de permissão restrita (push no ACR, leitura/escrita no repositório de manifests) — nenhum client secret ou chave de longa duração é armazenado como secret do GitHub. Consistente com o [ADR-0007](../03-decisoes-arquiteturais/0007-gitops-com-argocd-para-entrega-continua.md): a esteira nunca tem, em nenhum momento, uma credencial de escrita direta no cluster de produção.

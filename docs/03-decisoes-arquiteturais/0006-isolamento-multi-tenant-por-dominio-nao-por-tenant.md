@@ -6,7 +6,7 @@
 
 ## Contexto
 
-Com EKS definido como orquestrador (ADR-0005), é preciso decidir como o multi-tenancy do produto se traduz para a camada de compute. Existe uma tentação natural de espelhar a decisão de dados (schema por tenant, ADR-0001) diretamente na camada de Kubernetes — um namespace por tenant. O RNF de onboarding self-service em até 10 minutos e a premissa, já validada no discovery, de que o ArqFlow não roda instância dedicada por cliente (ver [`perguntas-discovery.md`](../01-discovery/perguntas-discovery.md#cada-cliente-vai-ter-sua-própria-instância-ou-é-tudo-compartilhado)) tornam essa pergunta concreta e não apenas teórica.
+Com Kubernetes definido como orquestrador (ADR-0005, hoje AKS pelo [ADR-0011](0011-migrar-plataforma-de-aws-eks-para-azure-aks.md)), é preciso decidir como o multi-tenancy do produto se traduz para a camada de compute. Existe uma tentação natural de espelhar a decisão de dados (schema por tenant, ADR-0001) diretamente na camada de Kubernetes — um namespace por tenant. O RNF de onboarding self-service em até 10 minutos e a premissa, já validada no discovery, de que o ArqFlow não roda instância dedicada por cliente (ver [`perguntas-discovery.md`](../01-discovery/perguntas-discovery.md#cada-cliente-vai-ter-sua-própria-instância-ou-é-tudo-compartilhado)) tornam essa pergunta concreta e não apenas teórica.
 
 ## Alternativas consideradas
 
@@ -15,16 +15,16 @@ Com EKS definido como orquestrador (ADR-0005), é preciso decidir como o multi-t
 - Contras: contradiz diretamente a razão pela qual o ADR-0001 rejeitou banco dedicado por tenant — o mesmo argumento de custo/operação que não escala para banco não escala para compute; onboarding deixaria de ser configuração (novo schema) e passaria a exigir provisionamento de infraestrutura nova a cada cliente; rollout de uma correção de bug ou nova versão precisaria ser coordenado em centenas de namespaces à medida que a base de clientes cresce.
 
 ### Opção B — Namespace por domínio/serviço, compute compartilhado entre tenants, isolamento de dados via schema (ADR-0001) e de identidade via token federado (ADR-0002)
-- Prós: consistente com o modelo de dados já decidido; onboarding de um novo tenant continua sendo configuração, não deploy; cada domínio (`identidade`, `demanda-cenario`, `custeio`, `integracao-ea`, `dashboard`) ganha seu próprio namespace com `ResourceQuota` e `NetworkPolicy` próprios, limitando o impacto de um domínio problemático sobre os demais.
+- Prós: consistente com o modelo de dados já decidido; onboarding de um novo tenant continua sendo configuração, não deploy; cada domínio (`bff`, `demanda-cenario`, `custeio`, `integracao-ea`, `dashboard`) ganha seu próprio namespace com `ResourceQuota` e `NetworkPolicy` próprios, limitando o impacto de um domínio problemático sobre os demais.
 - Contras: um bug de propagação de contexto de tenant na camada de aplicação (ex: esquecer de resolver o schema correto a partir do token) tem impacto potencialmente mais visível, já que o compute é compartilhado; "vizinho ruidoso" entre tenants dentro do mesmo serviço é possível se `requests`/`limits` não forem bem calibrados.
 
 ## Decisão
 
-O cluster é organizado por domínio de negócio, não por tenant: um namespace por serviço (`identidade`, `demanda-cenario`, `custeio`, `integracao-ea`, `dashboard`), cada um compartilhado por todos os tenants. A fronteira de isolamento entre clientes continua sendo o schema PostgreSQL (ADR-0001) e o token de identidade federado (ADR-0002) — não a topologia do cluster.
+O cluster é organizado por domínio de negócio, não por tenant: um namespace por serviço (`bff`, `demanda-cenario`, `custeio`, `integracao-ea`, `dashboard`), cada um compartilhado por todos os tenants. A fronteira de isolamento entre clientes continua sendo o schema PostgreSQL (ADR-0001) e o token de identidade federado (ADR-0002) — não a topologia do cluster.
 
 ## Padrão arquitetural
 
-**Bulkhead Pattern**, aplicado na fronteira de domínio em vez de na fronteira de tenant: cada namespace tem `ResourceQuota` e `LimitRange` próprios para que uma pressão de carga no worker de integração EA (naturalmente em rajada, por natureza do ADR-0003) não consuma recursos que o serviço de identidade — que precisa responder rápido para todo login de qualquer tenant — dependa. É o mesmo princípio geral já estabelecido em [`analise-trade-offs.md`](../05-trade-offs/analise-trade-offs.md) ("não assumir que um sistema é tão confiável ou controlável quanto o próprio produto"), aqui aplicado entre domínios internos, não apenas contra sistemas de terceiros.
+**Bulkhead Pattern**, aplicado na fronteira de domínio em vez de na fronteira de tenant: cada namespace tem `ResourceQuota` e `LimitRange` próprios para que uma pressão de carga no worker de integração EA (naturalmente em rajada, por natureza do ADR-0003) não consuma recursos de que o BFF — que precisa responder rápido a toda interação de qualquer usuário — depende. É o mesmo princípio geral já estabelecido em [`analise-trade-offs.md`](../05-trade-offs/analise-trade-offs.md) ("não assumir que um sistema é tão confiável ou controlável quanto o próprio produto"), aqui aplicado entre domínios internos, não apenas contra sistemas de terceiros.
 
 ## Justificativa
 

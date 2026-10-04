@@ -1,6 +1,6 @@
 # ADR-0005: Orquestrar os serviços em Amazon EKS, não ECS Fargate
 
-**Status:** aceito
+**Status:** substituído por [ADR-0011](0011-migrar-plataforma-de-aws-eks-para-azure-aks.md)
 **Data:** 2026-03-02
 **Decisores:** Arquitetura
 

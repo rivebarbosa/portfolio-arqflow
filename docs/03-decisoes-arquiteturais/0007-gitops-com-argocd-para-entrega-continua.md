@@ -6,7 +6,7 @@
 
 ## Contexto
 
-Com EKS definido (ADR-0005), falta decidir como uma mudança aprovada chega até o cluster. O modelo mais comum e mais simples é a esteira de CI (GitHub Actions) rodar `kubectl apply`/`helm upgrade` diretamente contra o cluster de produção ao final do pipeline. O ArqFlow lida com dados sensíveis de arquitetura corporativa de múltiplos clientes (ver [`contexto-negocio.md`](../01-discovery/contexto-negocio.md)) e o autor deste portfólio tem foco declarado em Zero Trust — a superfície de credenciais com poder de escrita em produção é, portanto, uma preocupação de primeira ordem, não um detalhe de implementação.
+Com Kubernetes definido (ADR-0005, hoje AKS pelo [ADR-0011](0011-migrar-plataforma-de-aws-eks-para-azure-aks.md)), falta decidir como uma mudança aprovada chega até o cluster. O modelo mais comum e mais simples é a esteira de CI (GitHub Actions) rodar `kubectl apply`/`helm upgrade` diretamente contra o cluster de produção ao final do pipeline. O ArqFlow lida com dados sensíveis de arquitetura corporativa de múltiplos clientes (ver [`contexto-negocio.md`](../01-discovery/contexto-negocio.md)) e o autor deste portfólio tem foco declarado em Zero Trust — a superfície de credenciais com poder de escrita em produção é, portanto, uma preocupação de primeira ordem, não um detalhe de implementação.
 
 ## Alternativas consideradas
 
@@ -20,7 +20,7 @@ Com EKS definido (ADR-0005), falta decidir como uma mudança aprovada chega até
 
 ## Decisão
 
-Adotar GitOps com Argo CD. A esteira de CI (GitHub Actions, ver [`esteira-cicd.md`](../06-implantacao-e-operacao/esteira-cicd.md)) é responsável apenas por build, teste, scan de segurança, publicação da imagem no ECR e atualização automatizada do repositório de manifests. O Argo CD, rodando dentro do próprio EKS, reconcilia o estado do cluster a partir desse repositório.
+Adotar GitOps com Argo CD. A esteira de CI (GitHub Actions, ver [`esteira-cicd.md`](../06-implantacao-e-operacao/esteira-cicd.md)) é responsável apenas por build, teste, scan de segurança, publicação da imagem no Azure Container Registry (ACR) e atualização automatizada do repositório de manifests. O Argo CD, rodando dentro do próprio AKS, reconcilia o estado do cluster a partir desse repositório.
 
 ## Padrão arquitetural
 
@@ -38,4 +38,4 @@ Dado que o próprio produto vende garantia de governança e segurança de arquit
 
 ## Revisitar quando
 
-Se a equipe permanecer pequena e a sobrecarga de operar o Argo CD não se justificar frente ao ganho de segurança/auditoria, considerar um meio-termo: push-based, mas com credenciais de curta duração via federação OIDC entre GitHub Actions e uma IAM Role com permissão restrita e temporária — evita chave estática de longa duração sem exigir um controlador adicional no cluster.
+Se a equipe permanecer pequena e a sobrecarga de operar o Argo CD não se justificar frente ao ganho de segurança/auditoria, considerar um meio-termo: push-based, mas com credenciais de curta duração via federação OIDC entre GitHub Actions e uma identidade do Entra ID (workload identity federation) com permissão restrita e temporária — evita chave estática de longa duração sem exigir um controlador adicional no cluster.
