@@ -46,9 +46,9 @@ Ao aprovar um cenário, o sistema deve registrar a decisão e disparar a sincron
 
 ## RF-07 — Autenticação via SSO corporativo
 
-Usuários devem acessar o ArqFlow exclusivamente através do provedor de identidade da própria empresa (tenant), sem necessidade de senha própria no ArqFlow.
+Usuários devem acessar o ArqFlow exclusivamente através do provedor de identidade corporativo (Microsoft Entra ID), sem necessidade de senha própria no ArqFlow.
 
-- **Critério de aceite:** o login redireciona para o IdP configurado pelo tenant (Azure AD, Okta, Google Workspace ou qualquer provedor OIDC/SAML compatível); um usuário nunca vê uma tela de "criar senha" do ArqFlow.
+- **Critério de aceite:** o login redireciona para o Entra ID pelo BFF ([ADR-0010](../03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md)); um usuário nunca vê uma tela de "criar senha" do ArqFlow; o papel do usuário vem das app roles do Entra ID.
 - **Origem:** [stakeholders.md](../01-discovery/stakeholders.md) (Time de Segurança/IAM do cliente)
 
 ## RF-08 — Dashboard de andamento de projetos

@@ -1,6 +1,6 @@
 # ADR-0002: Federar identidade via gateway OIDC/SAML central, não integrar cada IdP diretamente
 
-**Status:** aceito
+**Status:** substituído por [ADR-0010](0010-bff-como-token-handler-com-entra-id-e-sensedia.md)
 **Data:** 2026-02-05
 **Decisores:** Arquitetura, Engenharia
 

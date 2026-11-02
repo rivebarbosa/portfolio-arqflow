@@ -1,10 +1,14 @@
-# Portfólio de Arquitetura de Solução — ArqFlow (em contrução)
+# Portfólio de Arquitetura de Software — ArqFlow
 
 Este repositório documenta, do início ao fim, o processo de arquitetura de um produto fictício: **ArqFlow**, uma plataforma SaaS B2B para times de arquitetura de soluções gerenciarem o ciclo de vida de uma demanda técnica — do recebimento da demanda até a aprovação de um cenário de solução com custo estimado (FinOps) e desenho de arquitetura.
 
 Este é o segundo caso de estudo do meu portfólio. O primeiro ([PagFácil](https://github.com/rivebarbosa/portfolio-arquitetura)) trata de um domínio transacional/financeiro; este trata de um domínio diferente — uma ferramenta B2B multi-tenant de governança e produtividade para arquitetos — para mostrar como o mesmo processo de arquitetura se adapta a restrições muito diferentes (aqui, multi-tenancy, federação de identidade corporativa e integração com ferramentas de terceiros são as forças dominantes, não consistência transacional).
 
 > 💡 Projeto fictício, criado para fins de portfólio.
+
+> **Atualização (outubro/2026):** o ArqFlow passou a seguir a arquitetura de referência corporativa **SPA + BFF + OAuth 2.0/JWT (Azure + Sensedia)**. O BFF é o único cliente OAuth do Microsoft Entra ID e o navegador nunca recebe token; a plataforma migrou de AWS/EKS para Azure. Ver [ADR-0010](docs/03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md) e [ADR-0011](docs/03-decisoes-arquiteturais/0011-migrar-plataforma-de-aws-eks-para-azure-aks.md).
+
+> **Atualização (novembro/2026):** implantação e operação passaram a usar só a stack Microsoft: **Azure Container Apps** no lugar do AKS ([ADR-0012](docs/03-decisoes-arquiteturais/0012-azure-container-apps-como-plataforma-de-compute.md)), **Azure SQL Database** no lugar do PostgreSQL ([ADR-0013](docs/03-decisoes-arquiteturais/0013-azure-sql-database-como-banco-relacional.md)), **Azure Front Door Premium + WAF** na borda e **Azure Container Registry** para as imagens, com deploy por revisões via GitHub Actions + OIDC e infraestrutura em Bicep ([ADR-0014](docs/03-decisoes-arquiteturais/0014-entrega-continua-por-revisoes-do-container-apps.md)).
 
 ## Sobre mim
 
@@ -20,9 +24,10 @@ Sou **Roberto Rivelino Barbosa**, Arquiteto de Soluções Sênior, com experiên
 | 1. Discovery | [`docs/01-discovery/`](docs/01-discovery/README.md) | Contexto de negócio, stakeholders, perguntas feitas, premissas assumidas e o processo de demanda modelado em BPMN 2.0 |
 | 2. Requisitos | [`docs/02-requisitos/`](docs/02-requisitos/requisitos-funcionais.md) | Requisitos funcionais e não funcionais, com critérios de aceite mensuráveis |
 | 3. Decisões | [`docs/03-decisoes-arquiteturais/`](docs/03-decisoes-arquiteturais/) | ADRs — cada decisão relevante, alternativas consideradas e motivo da escolha |
-| 4. Diagramas | [`docs/04-diagramas/`](docs/04-diagramas/README.md) | Modelo C4 (contexto e containers), feitos em draw.io |
+| 4. Diagramas | [`docs/04-diagramas/`](docs/04-diagramas/README.md) | Modelo C4 (contexto, containers e implantação) e sequência de autenticação, com fontes em draw.io |
 | 5. Trade-offs | [`docs/05-trade-offs/analise-trade-offs.md`](docs/05-trade-offs/analise-trade-offs.md) | O que foi ganho e perdido em cada decisão relevante |
-| 6. Implantação | [`docs/06-implantacao-e-operacao/`](docs/06-implantacao-e-operacao/README.md) | Arquitetura AWS de referência (EKS), boas práticas de Kubernetes e esteira de CI/CD |
+| 6. Implantação | [`docs/06-implantacao-e-operacao/`](docs/06-implantacao-e-operacao/README.md) | Arquitetura Azure de referência (Container Apps, Azure SQL, Front Door + WAF, ACR), boas práticas de operação, esteira de CI/CD e FinOps |
+| 7. Código da aplicação | [`arqflow-app`](../arqflow-app) *(repositório separado, pasta irmã desta)* | Implementação real da primeira fatia vertical (NestJS + React + Postgres), ver ADR-0008 e ADR-0009 |
 
 ## Resumo do produto
 
@@ -42,15 +47,22 @@ ArqFlow é vendido a empresas (clientes B2B, cada uma um "tenant") cujos times d
 - Integração com um sistema de terceiros (BiZZdesign) que a ArqFlow não controla, com garantias de consistência realistas
 - Estimativa de custo (FinOps) que precisa ser rápida e comparável entre cenários, sem depender de chamada síncrona às APIs de precificação das clouds a cada cotação
 
-## Stack proposta
+## Stack proposta (arquitetura-alvo)
 
-
-
-- Backend: serviços organizados por domínio (Java 21 + Springboot 3.5)
 - Backend: serviços organizados por domínio, com API REST e contrato versionado
 - Integração assíncrona: fila de eventos para sincronização com o BiZZdesign e para o motor de custos, com idempotência no consumidor
-- Dados: PostgreSQL com schema por tenant, mais cache das tabelas de preço de nuvem
-- Identidade: broker OIDC/SAML para federação com o provedor de cada cliente
+- Dados: Azure SQL Database (Row-Level Security se a multi-tenancy voltar), mais cache das tabelas de preço de nuvem
+- Identidade: BFF como token handler (OAuth 2.0 + JWT, sessão no servidor), Microsoft Entra ID como IdP e Sensedia como API Gateway ([ADR-0010](docs/03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md))
+- Plataforma (stack Microsoft): Azure Container Apps, Azure Container Registry, Azure Front Door Premium + WAF, Azure SQL Database, Service Bus, Azure Managed Redis, Key Vault, Azure Monitor/Application Insights ([ADR-0012](docs/03-decisoes-arquiteturais/0012-azure-container-apps-como-plataforma-de-compute.md), [ADR-0013](docs/03-decisoes-arquiteturais/0013-azure-sql-database-como-banco-relacional.md))
+- Entrega: GitHub Actions com OIDC (Entra ID), deploy por revisões do Container Apps e IaC em Bicep ([ADR-0014](docs/03-decisoes-arquiteturais/0014-entrega-continua-por-revisoes-do-container-apps.md))
+
+> A linguagem/framework de implementação da primeira fatia real (não a
+> arquitetura-alvo completa acima, que prevê Container Apps, Azure SQL e o fluxo BFF + Entra ID)
+> já foi decidida: **NestJS (backend) + React (frontend) + PostgreSQL**,
+> containerizados com Docker — ver [`ADR-0008`](docs/03-decisoes-arquiteturais/0008-stack-de-implementacao-da-fatia-vertical-inicial.md)
+> para a justificativa completa e o código no repositório
+> [`arqflow-app`](../arqflow-app). Com o [ADR-0013](docs/03-decisoes-arquiteturais/0013-azure-sql-database-como-banco-relacional.md),
+> a fatia deve migrar o banco para SQL Server/Azure SQL (provider `sqlserver` do Prisma).
 
 ---
 

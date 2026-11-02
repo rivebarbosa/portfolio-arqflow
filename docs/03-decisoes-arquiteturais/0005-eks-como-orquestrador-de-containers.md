@@ -1,6 +1,6 @@
 # ADR-0005: Orquestrar os serviços em Amazon EKS, não ECS Fargate
 
-**Status:** aceito
+**Status:** substituído por [ADR-0011](0011-migrar-plataforma-de-aws-eks-para-azure-aks.md)
 **Data:** 2026-03-02
 **Decisores:** Arquitetura
 
@@ -33,7 +33,7 @@ A Opção A resolveria o problema imediato com menos esforço, mas o discovery d
 ## Consequências
 
 - O time precisa investir em competência de Kubernetes (RBAC, upgrade de versão do cluster, gestão de node groups) — não é uma competência que se ganha de graça só por o control plane ser gerenciado.
-- Custo fixo do control plane do EKS, independentemente de utilização, mais o custo dos node groups — exige que o dimensionamento (ADR relacionado a Karpenter/HPA, ver [`kubernetes-boas-praticas.md`](../06-implantacao-e-operacao/kubernetes-boas-praticas.md)) seja levado a sério para não pagar por capacidade ociosa.
+- Custo fixo do control plane do EKS, independentemente de utilização, mais o custo dos node groups — exige que o dimensionamento (ADR relacionado a Karpenter/HPA, ver [`kubernetes-boas-praticas.md`](../06-implantacao-e-operacao/container-apps-boas-praticas.md)) seja levado a sério para não pagar por capacidade ociosa.
 - Toda decisão subsequente de deploy, isolamento multi-tenant em compute e entrega contínua (ADRs 0006 e 0007) passa a ser modelada em cima de primitivas Kubernetes, não das primitivas mais simples do ECS.
 
 ## Revisitar quando

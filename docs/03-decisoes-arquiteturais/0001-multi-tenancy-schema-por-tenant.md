@@ -4,6 +4,8 @@
 **Data:** 2026-02-03
 **Decisores:** Arquitetura, Engenharia
 
+> **Atualização (novembro/2026):** o banco passou a ser Azure SQL Database ([ADR-0013](0013-azure-sql-database-como-banco-relacional.md)). Como o SQL Server não tem `search_path`, o isolamento por tenant, se a multi-tenancy voltar, será feito por **Row-Level Security** com o tenant em `SESSION_CONTEXT` — o banco continua garantindo o isolamento. Com o pivô para uma única empresa, a multi-tenancy está fora do escopo atual.
+
 ## Contexto
 
 O ArqFlow é vendido a múltiplas empresas-cliente (tenants), cada uma com dados de arquitetura corporativa potencialmente sensíveis (demandas, cenários, custos, diagramas). O discovery confirmou que o modelo é multi-tenant compartilhado (sem instância dedicada por cliente, ver [perguntas-discovery.md](../01-discovery/perguntas-discovery.md#cada-cliente-vai-ter-sua-própria-instância-ou-é-tudo-compartilhado)), mas o time de Segurança/IAM dos clientes trata isolamento de dados como restrição inegociável, não preferência.
