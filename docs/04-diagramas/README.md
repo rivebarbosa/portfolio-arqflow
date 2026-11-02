@@ -6,6 +6,7 @@ Diagramas em modelo **C4** (Contexto → Containers → Implantação), mais um 
 2. [`containers.drawio`](containers.drawio) / `containers.png` — SPA, Front Door, BFF, Sensedia, serviços de domínio e armazenamentos, e como se comunicam
 3. [`implantacao-c4.svg`](implantacao-c4.svg) — onde cada container roda em Azure Container Apps
 4. [`sequencia-autenticacao.svg`](sequencia-autenticacao.svg) — login, chamada de API, renovação de token e logout
+5. [`arqflow-azure-archify.html`](arqflow-azure-archify.html) — visão interativa da implantação na stack Microsoft, gerada com [Archify](https://github.com/tt-a1i/archify) a partir de [`arqflow-azure.archify.json`](arqflow-azure.archify.json) (abrir o HTML no navegador: o GitHub não renderiza a versão interativa)
 
 Os arquivos `.drawio` são editáveis no [draw.io](https://app.diagrams.net/). Os PNG e os SVG são gerados a partir do mesmo layout.
 
