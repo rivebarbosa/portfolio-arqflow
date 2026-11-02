@@ -1,8 +1,10 @@
 # ADR-0006: Isolar o cluster por domínio/serviço, não por tenant — a fronteira de tenant continua sendo o schema, não o namespace
 
-**Status:** aceito
+**Status:** aceito (princípio mantido; mecanismo atualizado pelo [ADR-0012](0012-azure-container-apps-como-plataforma-de-compute.md))
 **Data:** 2026-03-04
 **Decisores:** Arquitetura, Segurança
+
+> **Atualização (novembro/2026):** com o [ADR-0012](0012-azure-container-apps-como-plataforma-de-compute.md), o Bulkhead por domínio passa de *namespace* para *Container App* (um app por domínio, com réplicas e recursos próprios), e o `NetworkPolicy` dá lugar a ingress interno/desabilitado + NSG + revalidação do JWT em cada serviço. Com o [ADR-0013](0013-azure-sql-database-como-banco-relacional.md), a fronteira de tenant, se voltar a existir, passa a ser Row-Level Security no Azure SQL. A decisão central — isolar compute por domínio e dados por tenant — continua a mesma.
 
 ## Contexto
 
@@ -34,7 +36,7 @@ Tratar dados e compute como se precisassem, por padrão, da mesma estratégia de
 
 - `requests`/`limits` de CPU/memória por deployment precisam ser calibrados por domínio e revisados com base em uso real, não estimados uma única vez — é a principal mitigação ao risco de vizinho ruidoso entre tenants dentro do mesmo serviço.
 - `NetworkPolicy` default-deny entre namespaces de domínio, com exceções explícitas por fluxo conhecido (ex: `demanda-cenario` pode publicar no barramento de eventos consumido por `integracao-ea`; `dashboard` só pode ler do banco, nunca escrever).
-- Toda métrica e log precisa carregar o identificador de tenant como atributo/label — já que o isolamento não vem da topologia do cluster, a observabilidade é o que permite investigar um incidente específico de um cliente em compute compartilhado (ver [`kubernetes-boas-praticas.md`](../06-implantacao-e-operacao/kubernetes-boas-praticas.md#observabilidade)).
+- Toda métrica e log precisa carregar o identificador de tenant como atributo/label — já que o isolamento não vem da topologia do cluster, a observabilidade é o que permite investigar um incidente específico de um cliente em compute compartilhado (ver [`kubernetes-boas-praticas.md`](../06-implantacao-e-operacao/container-apps-boas-praticas.md#observabilidade)).
 - Um bug de propagação de contexto de tenant é, por desenho, um incidente de segurança de dados (mitigado pelo schema, ADR-0001) e não deveria nunca depender da topologia de namespaces como segunda linha de defesa real — a segunda linha de defesa é teste automatizado, não infraestrutura.
 
 ## Revisitar quando

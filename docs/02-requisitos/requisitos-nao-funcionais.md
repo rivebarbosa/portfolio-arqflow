@@ -15,7 +15,7 @@ Seguem a arquitetura de referência SPA + BFF + OAuth 2.0/JWT ([ADR-0010](../03-
 |---|---|---|
 | Provedor de identidade | Microsoft Entra ID corporativo, via OIDC (Authorization Code + PKCE) | Pivô para empresa única + arquitetura de referência |
 | Tokens no navegador | Nenhum: access, refresh e ID token ficam no BFF; o navegador recebe só um cookie `__Host-` `HttpOnly; Secure; SameSite` | ADR-0010 |
-| Autenticação do cliente OAuth | Certificado ou federated credential (Workload ID); client secret proibido em produção | ADR-0010 |
+| Autenticação do cliente OAuth | Certificado (lido do Key Vault pela Managed Identity do BFF) ou federated credential; client secret proibido em produção | ADR-0010 |
 | Vida do access token | 5 a 15 minutos, renovado pelo BFF com rotação do refresh token, sem ação do usuário | Arquitetura de referência |
 | Sessão | Expiração por inatividade de 30 min e absoluta de 8 h; ID de sessão renovado após o login | Arquitetura de referência |
 | Validação do JWT | Na Sensedia e em cada serviço: assinatura via JWKS em cache, `iss`, `aud`, `exp`/`nbf`, scopes/app roles | ADR-0010 (zero trust entre camadas) |

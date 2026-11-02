@@ -1,6 +1,6 @@
 # ADR-0011: Migrar a plataforma de AWS (EKS) para Azure (AKS)
 
-**Status:** aceito
+**Status:** parcialmente substituído — a migração para Azure continua válida; o compute (AKS) foi substituído pelo [ADR-0012](0012-azure-container-apps-como-plataforma-de-compute.md) (Container Apps) e o banco (PostgreSQL) pelo [ADR-0013](0013-azure-sql-database-como-banco-relacional.md) (Azure SQL Database)
 **Data:** 2026-10-03
 **Decisores:** Arquitetura (Roberto Rivelino Barbosa)
 **Substitui:** [ADR-0005](0005-eks-como-orquestrador-de-containers.md)
@@ -55,7 +55,7 @@ Com identidade, borda e segredos definidos em Azure pela arquitetura de referên
 
 ## Consequências
 
-- Etapa 06 reescrita para Azure: [`arquitetura-azure.md`](../06-implantacao-e-operacao/arquitetura-azure.md), [`kubernetes-boas-praticas.md`](../06-implantacao-e-operacao/kubernetes-boas-praticas.md), [`esteira-cicd.md`](../06-implantacao-e-operacao/esteira-cicd.md) e [`estimativa-finops.md`](../06-implantacao-e-operacao/estimativa-finops.md).
+- Etapa 06 reescrita para Azure: [`arquitetura-azure.md`](../06-implantacao-e-operacao/arquitetura-azure.md), [`kubernetes-boas-praticas.md`](../06-implantacao-e-operacao/container-apps-boas-praticas.md), [`esteira-cicd.md`](../06-implantacao-e-operacao/esteira-cicd.md) e [`estimativa-finops.md`](../06-implantacao-e-operacao/estimativa-finops.md).
 - ADR-0006 e ADR-0007 continuam válidos; só mudam as referências de EKS/ECR para AKS/ACR.
 - O namespace `identidade` (broker) dá lugar ao namespace `bff`.
 - A Sensedia é licenciada pela empresa e compartilhada entre aplicações; seu custo não entra na estimativa FinOps do ArqFlow.

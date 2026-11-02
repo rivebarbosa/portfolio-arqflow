@@ -1,6 +1,6 @@
 # ADR-0007: Entregar em produção via GitOps (Argo CD), não com a esteira de CI aplicando mudanças diretamente no cluster
 
-**Status:** aceito
+**Status:** substituído por [ADR-0014](0014-entrega-continua-por-revisoes-do-container-apps.md) — sem cluster Kubernetes (ADR-0012), não há onde rodar o Argo CD
 **Data:** 2026-03-06
 **Decisores:** Arquitetura, Segurança
 

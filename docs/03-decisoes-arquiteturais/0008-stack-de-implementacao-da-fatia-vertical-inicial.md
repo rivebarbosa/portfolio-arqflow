@@ -9,6 +9,8 @@
 > documentação. Ver a justificativa dessa separação no `README.md` da
 > raiz do repositório `arqflow-app`.
 
+> **Atualização (novembro/2026):** o banco-alvo passou a ser **Azure SQL Database** ([ADR-0013](0013-azure-sql-database-como-banco-relacional.md)) e a plataforma, **Azure Container Apps** ([ADR-0012](0012-azure-container-apps-como-plataforma-de-compute.md)). A fatia vertical troca o provider do Prisma para `sqlserver`; as imagens Docker passam a ser publicadas no **Azure Container Registry** em vez do GHCR ([ADR-0014](0014-entrega-continua-por-revisoes-do-container-apps.md)).
+
 ## Contexto
 
 Os ADRs 0001–0007 descrevem a arquitetura-alvo do ArqFlow em escala de produto SaaS B2B real: multi-tenancy, federação de identidade corporativa, EKS, GitOps com Argo CD, integração com BiZZdesign. Essa é a visão de arquitetura de referência do portfólio, mas ela não é o ponto de partida executável — é o destino.

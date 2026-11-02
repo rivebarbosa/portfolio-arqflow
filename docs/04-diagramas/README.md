@@ -1,10 +1,10 @@
 # Diagramas
 
-Diagramas em modelo **C4** (Contexto → Containers → Implantação), mais um diagrama de sequência do fluxo de autenticação. Seguem a arquitetura de referência **SPA + BFF + OAuth 2.0/JWT (Azure + Sensedia)** adotada no [ADR-0010](../03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md) e no [ADR-0011](../03-decisoes-arquiteturais/0011-migrar-plataforma-de-aws-eks-para-azure-aks.md).
+Diagramas em modelo **C4** (Contexto → Containers → Implantação), mais um diagrama de sequência do fluxo de autenticação. Seguem a arquitetura de referência **SPA + BFF + OAuth 2.0/JWT (Azure + Sensedia)** adotada no [ADR-0010](../03-decisoes-arquiteturais/0010-bff-como-token-handler-com-entra-id-e-sensedia.md) e implantados na stack Microsoft definida nos ADRs [0012](../03-decisoes-arquiteturais/0012-azure-container-apps-como-plataforma-de-compute.md) (Azure Container Apps) e [0013](../03-decisoes-arquiteturais/0013-azure-sql-database-como-banco-relacional.md) (Azure SQL Database).
 
 1. [`contexto.drawio`](contexto.drawio) / `contexto.png` — o ArqFlow, seus usuários e os sistemas externos: Microsoft Entra ID, Sensedia, BiZZdesign e APIs de precificação de nuvem
 2. [`containers.drawio`](containers.drawio) / `containers.png` — SPA, Front Door, BFF, Sensedia, serviços de domínio e armazenamentos, e como se comunicam
-3. [`implantacao-c4.svg`](implantacao-c4.svg) — onde cada container roda em Azure/AKS
+3. [`implantacao-c4.svg`](implantacao-c4.svg) — onde cada container roda em Azure Container Apps
 4. [`sequencia-autenticacao.svg`](sequencia-autenticacao.svg) — login, chamada de API, renovação de token e logout
 
 Os arquivos `.drawio` são editáveis no [draw.io](https://app.diagrams.net/). Os PNG e os SVG são gerados a partir do mesmo layout.
@@ -21,17 +21,17 @@ Os arquivos `.drawio` são editáveis no [draw.io](https://app.diagrams.net/). O
 
 **Leitura:**
 - A SPA só chama rotas `/bff/*` no mesmo domínio. O Front Door entrega os arquivos estáticos a partir do Blob Storage e encaminha `/bff/*` ao BFF por Private Link.
-- O **BFF** é o único cliente OAuth do Entra ID (Authorization Code + PKCE, autenticado por certificado via Workload ID). Guarda os tokens no **Cache de Sessão** (Redis) e entrega ao navegador só um cookie `HttpOnly`.
+- O **BFF** é o único cliente OAuth do Entra ID (Authorization Code + PKCE, autenticado por certificado lido do Key Vault com a Managed Identity do app). Guarda os tokens no **Cache de Sessão** (Azure Managed Redis) e entrega ao navegador só um cookie `HttpOnly`.
 - O BFF chama a **Sensedia** com o JWT. A Sensedia valida o token, aplica rate limit e quotas e encaminha aos serviços por mTLS. Cada serviço revalida o JWT e aplica a autorização por app role (Solicitante, Arquiteto, Gestor/PMO).
 - A aprovação de um cenário publica um evento no **Azure Service Bus**, consumido pelo **Serviço de Integração EA** — a aprovação nunca espera a BiZZdesign responder (ADR-0003).
-- O **Motor de Custeio** lê do **Cache de Preços**, atualizado por um CronJob a cada 24h (ADR-0004) — por isso a cotação é local e rápida (RNF < 1s). O Cache de Preços é uma instância separada do Cache de Sessão.
+- O **Motor de Custeio** lê do **Cache de Preços**, atualizado por um Container Apps Job a cada 24h (ADR-0004) — por isso a cotação é local e rápida (RNF < 1s). O Cache de Preços é uma instância separada do Cache de Sessão.
 - O Gateway de Identidade (broker OIDC/SAML) do desenho anterior foi removido: com uma única empresa e um único IdP, ele deixou de ter função ([ADR-0002](../03-decisoes-arquiteturais/0002-federacao-de-identidade-via-gateway-oidc.md), substituído).
 
 ## Diagrama de Implantação (C4 - Deployment)
 
-![Diagrama de Implantação - ArqFlow em Azure/AKS](implantacao-c4.svg)
+![Diagrama de Implantação - ArqFlow em Azure Container Apps](implantacao-c4.svg)
 
-**Leitura:** mostra *onde* cada container roda — namespace do AKS ou serviço gerenciado do Azure. A internet só alcança o Front Door. O BFF recebe tráfego do Front Door por Private Link Service; os serviços de dados ficam atrás de Private Endpoints; a saída para a BiZZdesign e para as APIs de precificação passa por um NAT Gateway com IP fixo. Detalhes em [`06-implantacao-e-operacao/arquitetura-azure.md`](../06-implantacao-e-operacao/arquitetura-azure.md).
+**Leitura:** mostra *onde* cada container roda — Container App (ou Job) no ambiente interno do Container Apps, ou serviço gerenciado do Azure. A internet só alcança o Front Door. O BFF recebe tráfego do Front Door por Private Link para o ambiente; os dados ficam no Azure SQL Database e no Azure Managed Redis, todos atrás de Private Endpoints; a saída para a BiZZdesign e para as APIs de precificação passa por um NAT Gateway com IP fixo. Detalhes em [`06-implantacao-e-operacao/arquitetura-azure.md`](../06-implantacao-e-operacao/arquitetura-azure.md).
 
 ## Diagrama de sequência
 
@@ -41,4 +41,4 @@ Os arquivos `.drawio` são editáveis no [draw.io](https://app.diagrams.net/). O
 
 ---
 
-**Nota técnica:** os diagramas são gerados por script a partir de um único layout com coordenadas explícitas (o `.drawio` para edição e o PNG/SVG para leitura no GitHub). A primeira versão do diagrama de implantação foi feita em Mermaid; com muitos elementos aninhados, o layout automático do GitHub sobrepunha caixas e texto, e por isso a troca por coordenadas fixas.
+**Nota técnica:** os diagramas são gerados por script a partir de um único layout com coordenadas explícitas (o `.drawio` para edição e o PNG/SVG para leitura no GitHub). A primeira versão do diagrama de implantação foi feita em Mermaid; com muitos elementos aninhados, o layout automático do GitHub sobrepunha caixas e texto, e por isso a troca por coordenadas fixas. Na atualização para Container Apps + Azure SQL (novembro/2026), o layout foi mantido e só os rótulos mudaram, no `.drawio`, no SVG e nos PNG.
